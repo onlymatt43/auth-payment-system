@@ -1,0 +1,173 @@
+<!-- Code pour Breakdance WordPress - Validation d'accès TOTP -->
+<style>
+.access-form {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.access-form h3 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.access-form input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.access-form button {
+  width: 100%;
+  padding: 12px;
+  background: #007cba;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.access-form button:hover {
+  background: #005a87;
+}
+
+.access-form button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.success-message {
+  text-align: center;
+  color: #28a745;
+  font-weight: bold;
+  margin: 20px 0;
+}
+
+.error-message {
+  text-align: center;
+  color: #dc3545;
+  margin: 20px 0;
+}
+
+.hidden {
+  display: none;
+}
+</style>
+
+<div id="access-container">
+  <div id="access-form" class="access-form">
+    <h3>🔐 Accès au Contenu Exclusif</h3>
+    <input type="email" id="user-email" placeholder="Votre email Payhip" required>
+    <input type="text" id="totp-token" placeholder="Code Google Authenticator (6 chiffres)" maxlength="6" required>
+    <button id="validate-btn" onclick="validateAccess()">Valider l'Accès</button>
+  </div>
+
+  <div id="success-message" class="success-message hidden">
+    ✅ Accès accordé ! Le contenu exclusif est maintenant disponible ci-dessous.
+  </div>
+
+  <div id="error-message" class="error-message hidden">
+    ❌ Code invalide. Vérifiez votre email et votre code TOTP.
+  </div>
+</div>
+
+<!-- Contenu exclusif (masqué par défaut) -->
+<div id="exclusive-content" class="hidden">
+  <!-- Mettez votre contenu exclusif ici -->
+  <h2>🎥 Contenu Exclusif</h2>
+  <p>Félicitations ! Vous avez accès au contenu premium.</p>
+  <!-- Exemple de vidéo -->
+  <!-- <video controls>
+    <source src="votre-video-exclusive.mp4" type="video/mp4">
+  </video> -->
+</div>
+
+<script>
+async function validateAccess() {
+  const email = document.getElementById('user-email').value.trim();
+  const token = document.getElementById('totp-token').value.trim();
+
+  if (!email || !token) {
+    showError('Veuillez remplir tous les champs.');
+    return;
+  }
+
+  if (token.length !== 6 || !/^\d{6}$/.test(token)) {
+    showError('Le code TOTP doit contenir 6 chiffres.');
+    return;
+  }
+
+  // Désactiver le bouton pendant la validation
+  const btn = document.getElementById('validate-btn');
+  btn.disabled = true;
+  btn.textContent = 'Validation...';
+
+  try {
+    const response = await fetch('https://auth-payment-system.onrender.com/api/validate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: email,
+        token: token
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.valid && data.accessGranted) {
+      showSuccess();
+      // Sauvegarder en localStorage pour éviter de redemander
+      localStorage.setItem('accessGranted', 'true');
+      localStorage.setItem('userEmail', email);
+    } else {
+      showError('Code invalide ou expiré. Vérifiez votre application Google Authenticator.');
+    }
+  } catch (error) {
+    showError('Erreur de connexion. Réessayez plus tard.');
+    console.error('Erreur:', error);
+  } finally {
+    // Réactiver le bouton
+    btn.disabled = false;
+    btn.textContent = 'Valider l\'Accès';
+  }
+}
+
+function showSuccess() {
+  document.getElementById('access-form').classList.add('hidden');
+  document.getElementById('error-message').classList.add('hidden');
+  document.getElementById('success-message').classList.remove('hidden');
+  document.getElementById('exclusive-content').classList.remove('hidden');
+}
+
+function showError(message) {
+  document.getElementById('error-message').textContent = '❌ ' + message;
+  document.getElementById('error-message').classList.remove('hidden');
+  document.getElementById('success-message').classList.add('hidden');
+}
+
+// Vérifier si l'accès est déjà accordé (session persistante)
+window.addEventListener('DOMContentLoaded', function() {
+  const hasAccess = localStorage.getItem('accessGranted') === 'true';
+  if (hasAccess) {
+    showSuccess();
+  }
+});
+
+// Permettre la validation avec Enter
+document.getElementById('totp-token').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    validateAccess();
+  }
+});
+</script>
