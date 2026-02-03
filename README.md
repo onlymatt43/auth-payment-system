@@ -144,6 +144,17 @@ Add a purchase button to your website using the provided `payhip-button.html`:
 
 Replace `YOUR_PRODUCT_LINK` with your actual Payhip product link.
 
+## WordPress Integration (Breakdance)
+
+For WordPress sites using Breakdance page builder, use the complete integration code from `wordpress-breakdance-integration.html`:
+
+1. Add a **Code Block** element in Breakdance
+2. Paste the entire HTML code
+3. Customize the exclusive content section
+4. Publish your page
+
+The code includes form validation, error handling, and persistent access sessions.
+
 ## Deployment
 
 ### Render (Recommended)
