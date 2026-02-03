@@ -24,4 +24,8 @@ A modular authentication and payment system using TOTP, QR codes, email, and dat
 
 ## Usage
 
-Integrate with Payhip or other payment systems to trigger access generation.
+Integrate with Payhip by setting the download URL to `https://your-domain.com/qr?code={license_key}`.
+
+## Deployment
+
+Deployed on Vercel with GitHub integration.
