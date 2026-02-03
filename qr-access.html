@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Accès QR Code</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f5f5f5; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        input { padding: 12px; margin: 15px 0; width: 100%; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
+        button { padding: 12px 30px; background: #0070f3; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #0056b3; }
+        h1 { color: #333; }
+        p { color: #666; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Accès à votre QR Code</h1>
+        <p>Entrez votre clé de licence Payhip reçue par email pour générer votre QR code d'accès :</p>
+        <input type="text" id="licenseCode" placeholder="Votre clé de licence (ex: ABC123-XYZ789)">
+        <br>
+        <button onclick="generateQR()">Générer mon QR Code</button>
+        <p style="font-size: 14px; margin-top: 20px;">
+            Après génération, scannez le QR code avec Google Authenticator pour accéder au contenu exclusif.
+        </p>
+    </div>
+    
+    <script>
+        function generateQR() {
+            const code = document.getElementById('licenseCode').value.trim();
+            if (code) {
+                // Remplacer par votre URL Render réelle
+                const baseUrl = 'https://auth-payment-system.onrender.com';
+                window.location.href = `${baseUrl}/qr?code=${encodeURIComponent(code)}`;
+            } else {
+                alert('Veuillez entrer votre clé de licence Payhip');
+            }
+        }
+        
+        // Permettre la soumission avec Enter
+        document.getElementById('licenseCode').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateQR();
+            }
+        });
+    </script>
+</body>
+</html>
