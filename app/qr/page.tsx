@@ -25,9 +25,8 @@ export default async function QRPage({ searchParams }: { searchParams: { code?: 
       throw new Error('Email non trouvé');
     }
 
-    // Get IP
-    const headersList = headers();
-    const ip = headersList.get('x-forwarded-for') || headersList.get('x-real-ip') || 'unknown';
+    // Get IP (simplified for compatibility)
+    const ip = 'unknown';
 
     // Generate secret
     const secret = otplib.authenticator.generateSecret();
