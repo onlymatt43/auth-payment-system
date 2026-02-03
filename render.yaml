@@ -24,4 +24,4 @@ services:
       - key: SMTP_USER
         value: connectt@onlymatt.ca
       - key: SMTP_PASS
-        value: qudSik3vodkawuqquv$
+        value: "qudSik3vodkawuqquv$"
