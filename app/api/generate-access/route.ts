@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+// Updated to use Nodemailer instead of Resend
 import { TOTP } from 'otplib';
 import qrcode from 'qrcode';
 import client from '../../../lib/turso';
