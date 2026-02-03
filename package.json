@@ -1,0 +1,26 @@
+{
+  "name": "auth-payment-system",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.17.0",
+    "axios": "^1.13.4",
+    "next": "16.1.6",
+    "otplib": "^13.2.1",
+    "qrcode": "^1.5.4",
+    "resend": "^6.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "typescript": "^5"
+  }
+}
