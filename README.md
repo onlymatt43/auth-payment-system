@@ -28,4 +28,4 @@ Integrate with Payhip by setting the download URL to `https://your-domain.com/qr
 
 ## Deployment
 
-Deployed on Vercel with GitHub integration.
+Deployed on Render with GitHub integration.
