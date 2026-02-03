@@ -11,9 +11,9 @@
     "@libsql/client": "^0.17.0",
     "axios": "^1.13.4",
     "next": "16.1.6",
+    "nodemailer": "^7.0.13",
     "otplib": "^13.2.1",
-    "qrcode": "^1.5.4",
-    "resend": "^6.9.1"
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "@types/node": "^20",
