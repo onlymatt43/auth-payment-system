@@ -132,6 +132,18 @@ If only file uploads are allowed:
 
 This provides a seamless experience with minimal extra steps.
 
+## Website Integration
+
+Add a purchase button to your website using the provided `payhip-button.html`:
+
+```html
+<a href="https://payhip.com/b/YOUR_PRODUCT_LINK" class="payhip-button" target="_blank">
+  🔐 Accéder au Contenu Exclusif
+</a>
+```
+
+Replace `YOUR_PRODUCT_LINK` with your actual Payhip product link.
+
 ## Deployment
 
 ### Render (Recommended)
