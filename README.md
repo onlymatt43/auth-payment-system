@@ -118,6 +118,20 @@ RENDER_SERVICE_ID=your_render_service_id
 RENDER_TOKEN=your_render_token
 ```
 
+## Payhip Integration
+
+### Option 1: URL Download (Recommandé)
+If your Payhip plan supports URL downloads:
+- Set download URL to: `https://your-render-url.onrender.com/qr?code={license_key}`
+
+### Option 2: HTML File Download
+If only file uploads are allowed:
+- Download `qr-access.html` from this repository
+- Upload it as a digital download in Payhip
+- Users download the HTML file, enter their license key, and access the QR code
+
+This provides a seamless experience with minimal extra steps.
+
 ## Deployment
 
 ### Render (Recommended)
