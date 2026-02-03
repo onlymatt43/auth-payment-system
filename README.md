@@ -142,10 +142,13 @@ The app will be available at `http://localhost:3000`
 ## Usage Flow
 
 1. **Purchase on Payhip**: User buys your product and receives a license key
-2. **Generate Access**: Call `/api/generate-access` with email and Payhip code
-3. **QR Code Delivery**: User receives QR code via email
-4. **Setup Authenticator**: User scans QR with Google Authenticator
+2. **Direct QR Access**: User clicks download link, redirected to `/qr?code={license_key}`
+3. **QR Code Display**: System validates Payhip code and displays QR code immediately
+4. **Setup Authenticator**: User scans QR with Google Authenticator app
 5. **Access Content**: Use `/api/validate` to verify TOTP tokens for content access
+
+### Alternative: Email Delivery
+For manual access generation, use `/api/generate-access` to send QR via email.
 
 ## Project Structure
 
