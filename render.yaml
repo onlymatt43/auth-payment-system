@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: auth-payment-system
+    env: node
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TURSO_DATABASE_URL
+        value: libsql://videotheque-onlymatt43.aws-us-east-2.turso.io
+      - key: TURSO_AUTH_TOKEN
+        value: eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3Njk3MzIyODYsImlkIjoiMTU0OTFiZWEtOTU3OS00M2E0LWIyYmEtNjUxNTdhNjMyMWU4IiwicmlkIjoiMDkyZDk3ZjctNjNhMi00ODI0LTllYTQtNGI2MjY2ZjRkY2NmIn0.iw5FwdU7k05QniOs1g8mUjut83HvkdF6-gok372awhrmxGCij058UJH5J7DDAy-fGvsb-Shs3G-_7fPDylvGCg
+      - key: PAYHIP_API_KEY
+        value: prod_sk_YrwzM_2228ed2bfd434a9fba256a0dc14bfad7dc3001af
+      - key: PAYHIP_PRODUCT_ID
+        value: YrwzM
+      - key: PAYHIP_API_BASE_URL
+        value: https://payhip.com/api/v2
+      - key: SMTP_HOST
+        value: smtp.hostinger.com
+      - key: SMTP_PORT
+        value: 465
+      - key: SMTP_USER
+        value: connectt@onlymatt.ca
+      - key: SMTP_PASS
+        value: qudSik3vodkawuqquv$
