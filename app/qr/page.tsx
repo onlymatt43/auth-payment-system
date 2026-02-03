@@ -26,7 +26,8 @@ export default async function QRPage({ searchParams }: { searchParams: { code?: 
     }
 
     // Get IP
-    const ip = 'unknown'; // TODO: get from headers
+    const headersList = headers();
+    const ip = headersList.get('x-forwarded-for') || headersList.get('x-real-ip') || 'unknown';
 
     // Generate secret
     const secret = otplib.authenticator.generateSecret();
@@ -43,7 +44,11 @@ export default async function QRPage({ searchParams }: { searchParams: { code?: 
         <h1>Accès Google Authenticator</h1>
         <p>Scanne ce QR code avec Google Authenticator pour configurer ton accès.</p>
         <img src={qrCodeDataURL} alt="QR Code" />
-        <p>Après configuration, utilise les codes générés pour accéder au contenu.</p>
+        <br />
+        <a href={qrCodeDataURL} download="qr-code.png" style={{ marginTop: '20px', display: 'inline-block', padding: '10px 20px', backgroundColor: '#0070f3', color: 'white', textDecoration: 'none', borderRadius: '5px' }}>
+          Télécharger le QR Code
+        </a>
+        <p style={{ marginTop: '20px' }}>Après configuration, utilise les codes générés pour accéder au contenu.</p>
       </div>
     );
   } catch (error) {
