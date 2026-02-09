@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Accès QR Code</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        input { padding: 10px; margin: 10px; width: 300px; }
+        button { padding: 10px 20px; background: #0070f3; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Accès à votre QR Code</h1>
+    <p>Entrez votre clé de licence Payhip pour générer votre QR code :</p>
+    <input type="text" id="licenseCode" placeholder="Votre clé de licence">
+    <br>
+    <button onclick="generateQR()">Générer QR Code</button>
+    
+    <script>
+        function generateQR() {
+            const code = document.getElementById('licenseCode').value;
+            if (code) {
+                window.location.href = `https://votre-render-url.onrender.com/qr?code=${code}`;
+            } else {
+                alert('Veuillez entrer votre clé de licence');
+            }
+        }
+    </script>
+</body>
+</html>
