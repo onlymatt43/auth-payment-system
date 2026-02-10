@@ -17,11 +17,13 @@ export async function POST(req: NextRequest) {
         }
 
         try {
-            const payhipRes = await axios.get('https://payhip.com/api/v2/license/verify', {
-                params: { license_key: body.code },
+            const payhipRes = await axios.post('https://payhip.com/api/v2/license/verify', {
+                license_key: body.code,
+                product_link: process.env.PAYHIP_PRODUCT_ID
+            }, {
                 headers: { 
                     'product-secret-key': process.env.PAYHIP_API_KEY,
-                    'Accept': 'application/json'
+                    'Content-Type': 'application/json'
                 }
             });
 
