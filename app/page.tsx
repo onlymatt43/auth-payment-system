@@ -13,9 +13,14 @@ const links = [
 
 export default function Home() {
   const [email, setEmail] = useState('');
+  const [payhipEmail, setPayhipEmail] = useState('');
+  const [payhipCode, setPayhipCode] = useState('');
   const [message, setMessage] = useState('');
+  const [modalMessage, setModalMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [accessGranted, setAccessGranted] = useState(false);
 
   // 1. Gestion du formulaire "Subscribe / Access" existant
   const handleSubscribe = async (e: React.FormEvent) => {
@@ -36,6 +41,38 @@ export default function Home() {
     }
   };
 
+  // 2. Gestion du formulaire Payhip (Validation réelle)
+  const handlePayhipValidate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setModalLoading(true);
+    setModalMessage('');
+    
+    try {
+      const res = await fetch('/api/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: payhipCode, email: payhipEmail }),
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok && data.valid) {
+        setAccessGranted(true);
+        setModalMessage("✅ Code valide ! Accès autorisé.");
+        // Sauvegarde locale comme sur le widget externe
+        localStorage.setItem('accessGranted', 'true');
+        localStorage.setItem('userEmail', payhipEmail);
+        localStorage.setItem('payhipCode', payhipCode);
+      } else {
+        setModalMessage(`❌ ${data.message || 'Code invalide'}`);
+      }
+    } catch (err) {
+      setModalMessage("❌ Erreur de connexion au serveur.");
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center px-6 py-12 font-sans">
       
@@ -44,13 +81,13 @@ export default function Home() {
         <div className="w-28 h-28 rounded-full overflow-hidden border border-zinc-800 mb-6 shadow-2xl shadow-zinc-900/50 relative">
           <Image 
             src="https://onlymatt-media.b-cdn.net/Untitled-7.png" 
-            alt="Mathieu Courchesne" 
+            alt="ONLYMATT" 
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
             className="object-cover grayscale hover:grayscale-0 transition-all duration-700 ease-in-out"
           />
         </div>
-        <h1 className="text-xl font-light tracking-[0.3em] uppercase">Mathieu Courchesne</h1>
+        <h1 className="text-xl font-light tracking-[0.3em] uppercase">ONLYMATT</h1>
         <div className="h-[1px] w-12 bg-zinc-700 my-4"></div>
         <p className="text-zinc-500 text-xs uppercase tracking-widest font-medium">UNIVERSAL CONNECT</p>
       </div>
@@ -147,15 +184,42 @@ export default function Home() {
                             <div className="h-[1px] bg-zinc-800 flex-1"></div>
                         </div>
 
-                        <form className="space-y-3" onSubmit={(e) => {
-                            e.preventDefault();
-                            alert("Ceci est une démo sur la Homepage. Les tests réels se font depuis Chaud Devant :)");
-                        }}>
-                            <input type="email" placeholder="Email" className="w-full bg-black border border-zinc-800 rounded-lg px-4 py-3 text-sm focus:border-emerald-500 outline-none text-white placeholder-zinc-700" />
-                            <input type="text" placeholder="Code Licence" className="w-full bg-black border border-zinc-800 rounded-lg px-4 py-3 text-sm focus:border-emerald-500 outline-none text-white placeholder-zinc-700" />
-                            <button className="w-full py-3 bg-white text-black font-bold text-xs uppercase tracking-widest rounded-lg hover:bg-zinc-200 transition-transform active:scale-95">
-                                Valider
+                        <form className="space-y-3" onSubmit={handlePayhipValidate}>
+                            <input 
+                                type="email" 
+                                placeholder="Email" 
+                                value={payhipEmail}
+                                onChange={(e) => setPayhipEmail(e.target.value)}
+                                required
+                                className="w-full bg-black border border-zinc-800 rounded-lg px-4 py-3 text-sm focus:border-emerald-500 outline-none text-white placeholder-zinc-700" 
+                            />
+                            <input 
+                                type="text" 
+                                placeholder="Code Licence" 
+                                value={payhipCode}
+                                onChange={(e) => setPayhipCode(e.target.value)}
+                                required
+                                className="w-full bg-black border border-zinc-800 rounded-lg px-4 py-3 text-sm focus:border-emerald-500 outline-none text-white placeholder-zinc-700" 
+                            />
+                            
+                            <button 
+                                type="submit"
+                                disabled={modalLoading || accessGranted}
+                                className={`w-full py-3 font-bold text-xs uppercase tracking-widest rounded-lg transition-all ${
+                                    accessGranted 
+                                    ? 'bg-emerald-500 text-black cursor-default'
+                                    : 'bg-white text-black hover:bg-zinc-200 active:scale-95'
+                                }`}
+                            >
+                                {modalLoading ? 'Vérification...' : (accessGranted ? 'Accès Autorisé' : 'Valider')}
                             </button>
+
+                            {/* Message de statut */}
+                            {modalMessage && (
+                                <p className={`text-center text-xs mt-2 ${modalMessage.includes('✅') ? 'text-emerald-400' : 'text-red-400'}`}>
+                                    {modalMessage}
+                                </p>
+                            )}
                         </form>
                     </div>
                 </div>
