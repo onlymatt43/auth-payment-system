@@ -173,7 +173,7 @@ export default function Home() {
                     <div className="space-y-6">
                         <div className="text-center">
                             <p className="text-zinc-500 text-xs mb-3 uppercase tracking-wider">Pas de code ?</p>
-                            <a href="https://payhip.com" target="_blank" className="block w-full py-3 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-emerald-900/10 transition-colors text-center">
+                            <a href="https://payhip.com/storebytheom43team" target="_blank" className="block w-full py-3 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-emerald-900/10 transition-colors text-center">
                                 Acheter une licence →
                             </a>
                         </div>
