@@ -1,10 +1,60 @@
 import { NextRequest, NextResponse } from 'next/server';
 const otplib = require('otplib');
 import client from '../../../lib/turso';
+import axios from 'axios';
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, token } = await req.json();
+    const body = await req.json();
+    const { email } = body;
+
+    // --- MODE 1: PAYHIP LICENSE VALIDATION ---
+    // Si un "code" Payhip est fourni
+    if (body.code) {
+        if (!process.env.PAYHIP_API_KEY) {
+            console.error("PAYHIP_API_KEY manquante");
+            return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
+        }
+
+        try {
+            const payhipRes = await axios.get('https://payhip.com/api/v2/license/verify', {
+                params: { license_key: body.code },
+                headers: { 
+                    'product-secret-key': process.env.PAYHIP_API_KEY,
+                    'Accept': 'application/json'
+                }
+            });
+
+            const license = payhipRes.data.data;
+            
+            // Vérifier si la licence est valide et activée
+            if (payhipRes.data.success && license.enabled) {
+                // (Optionnel) Vérifier l'email si nécessaire : license.buyer_email === email
+                return NextResponse.json({ 
+                    valid: true, 
+                    type: 'payhip',
+                    details: {
+                        product: license.product_name,
+                        email: license.buyer_email
+                    }
+                });
+            } else {
+                return NextResponse.json({ 
+                    valid: false, 
+                    message: 'Licence invalide ou désactivée' 
+                }, { status: 401 });
+            }
+        } catch (err: any) {
+            console.error("Erreur Payhip:", err.response?.data || err.message);
+            return NextResponse.json({ 
+                valid: false, 
+                message: 'Erreur de vérification Payhip' 
+            }, { status: 401 });
+        }
+    }
+
+    // --- MODE 2: OTP / QR CODE (Legacy/Admin) ---
+    const { token } = body;
     if (!email || !token) {
       return NextResponse.json({ error: 'Email and token required' }, { status: 400 });
     }
