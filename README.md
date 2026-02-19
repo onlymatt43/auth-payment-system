@@ -17,9 +17,10 @@ A modular authentication and payment system integrating Payhip for exclusive con
 
 - Node.js 20.x or higher
 - GitHub account
-- Render account (for deployment)
+- Vercel or Render account (for deployment)
 - Payhip account with API access
-- SMTP email service
+- SMTP email service (e.g., Gmail, SendGrid, Mailgun)
+- Turso account for database (free tier available at [turso.tech](https://turso.tech))
 
 ### Installation
 
@@ -33,9 +34,22 @@ cd auth-payment-system
 ```bash
 npm install
 ```
+.local` file in the root directory with the required environment variables (see Environment Variables section below).
 
-3. Create a `.env` file with the required environment variables (see Environment Variables section).
+4. Initialize your Turso database:
+```bash
+turso db create auth-payment-system
+turso db tokens create auth-payment-system
+```
 
+5. Run the database setup:
+```bash
+npm run dev
+# In another terminal:
+curl -X POST http://localhost:3000/api/setup
+```
+
+6. Start developing
 4. Run locally:
 ```bash
 npm run dev
@@ -48,32 +62,49 @@ Initializes the database table for access codes.
 
 **Request:**
 ```bash
-curl -X POST https://your-render-url.onrender.com/api/setup
+curl -X POST https://your-domain.com/api/setup
 ```
 
 ### POST /api/generate-access
-Generates a TOTP secret, validates Payhip code, and sends QR code via email.
+Generates a TOTP secret and sends QR code via email (admin/manual access).
 
 **Request:**
 ```json
 {
-  "email": "user@example.com",
-  "payhipCode": "your-payhip-license-key"
+  "email": "user@example.com"
 }
 ```
 
 **Response:**
 ```json
 {
-  "success": true,
-  "message": "QR code sent to your email"
+  "message": "Access sent to email"
 }
 ```
 
 ### POST /api/validate
-Validates a TOTP token against stored secrets.
+Validates access via two modes:
 
-**Request:**
+**Mode 1 - Payhip License Validation:**
+```json
+{
+  "code": "your-payhip-license-key"
+}
+```
+
+**Response (success):**
+```json
+{
+  "valid": true,
+  "type": "payhip",
+  "details": {
+    "product": "Product Name",
+    "email": "buyer@example.com"
+  }
+}
+```
+
+**Mode 2 - TOTP Token Validation:**
 ```json
 {
   "email": "user@example.com",
@@ -81,16 +112,36 @@ Validates a TOTP token against stored secrets.
 }
 ```
 
-**Response:**
+**Response (success):**
 ```json
 {
-  "valid": true,
-  "accessGranted": true
+  "valid": true
 }
 ```
 
 ### GET /qr?code=[payhip-code]
 Displays QR code page after Payhip purchase validation.
+
+---
+
+## Pages
+
+### `/` - Homepage
+Main landing page with:
+- Email/OTP access request form
+- Links to social profiles and payment services
+- Payhip validation modal for premium access
+.local` file in the root directory (for local development) or add these in your deployment platform
+### `/links` - Social Links
+Displays your contact and social media links:
+- Official website
+- Amazon profile
+- WhatsApp
+- PayPal
+- Wise
+
+### `/qr` - QR Code Display
+Protected page that validates Payhip code and displays Google Authenticator QR code.
 
 ## Environment Variables
 
@@ -106,9 +157,9 @@ ALLOW_PAYHIP_BYPASS=false
 # Database
 TURSO_AUTH_TOKEN=your_turso_auth_token
 TURSO_DATABASE_URL=your_turso_database_url
-
-# Email (SMTP)
-SMTP_HOST=your_smtp_host
+ended)
+If your Payhip plan supports URL downloads:
+- Set download URL to: `https://your-domain.vercel.app
 SMTP_PASS=your_smtp_password
 SMTP_PORT=465
 SMTP_USER=your_smtp_username
@@ -157,12 +208,31 @@ The code includes form validation, error handling, and persistent access session
 
 ## Deployment
 
-### Render (Recommended)
+### Vercel (Recommended)
+
+1. Install Vercel CLI: `npm i -g vercel`
+2. Run `vercel` in the project directory
+3. Follow the prompts to link/create a project
+4. Add environment variables in Vercel dashboard or via CLI:
+   ```bash
+   vercel env add TURSO_DATABASE_URL
+   vercel env add TURSO_AUTH_TOKEN
+   vercel env add PAYHIP_API_KEY
+   # ... add all required env vars
+   ```
+5. Deploy: `vercel --prod`
+
+Alternatively, deploy via GitHub integration:
+1. Import repository on [vercel.com](https://vercel.com)
+2. Add environment variables in Project Settings
+3. Deploy automatically on git push
+
+### Render (Alternative)
 
 1. Create a new **Web Service** on Render
-2. Connect your GitHub repository: `https://github.com/onlymatt43/auth-payment-system`
+2. Connect your GitHub repository
 3. Configure settings:
-   - **Branch**: `master`
+   - **Branch**: `main`
    - **Build Command**: `npm install && npm run build`
    - **Start Command**: `npm run start`
 4. Add environment variables in the Environment section
@@ -176,32 +246,68 @@ npm run dev
 
 The app will be available at `http://localhost:3000`
 
+**Note:** Environment variables are required for full functionality. See `.env.example` (create one based on the template below).
+
 ## Usage Flow
 
 1. **Purchase on Payhip**: User buys your product and receives a license key
-2. **Direct QR Access**: User clicks download link, redirected to `/qr?code={license_key}`
-3. **QR Code Display**: System validates Payhip code and displays QR code immediately
-4. **Setup Authenticator**: User scans QR with Google Authenticator app
-5. **Access Content**: Use `/api/validate` to verify TOTP tokens for content access
-
-### Alternative: Email Delivery
-For manual access generation, use `/api/generate-access` to send QR via email.
-
-## Project Structure
-
-```
+2. **Dirpage.tsx              # Homepage with access forms
+│   ├── layout.tsx            # Root layout
+│   ├── globals.css           # Global styles
+│   ├── api/
+│   │   ├── generate-access/route.ts  # Email QR delivery
+│   │   ├── validate/route.ts         # Payhip + TOTP validation
+│   │   └── setup/route.ts            # Database initialization
+│   ├── links/
+│   │   └── page.tsx          # Social links page
+│   └── qr/
+│       └── page.tsx          # QR code display after purchase
+├── lib/
+│   ├── turso.ts              # Database client (lazy init)
+│   ├── payhip.ts             # Payhip API integration
+│   └── email.ts              # SMTP email service
+├── package.json
+├── next.config.ts            # Next.js configuration
+├── tsconfig.json
 auth-payment-system/
 ├── app/
 │   ├── api/
 │   │   ├── generate-access/route.ts
 │   │   ├── validate/route.ts
-│   │   └── setup/route.ts
-│   └── qr/page.tsx
-├── lib/
-│   ├── turso.ts          # Database client
-│   ├── payhip.ts         # Payhip API integration
-│   └── email.ts          # SMTP email service
-├── package.json
+│   │   └── se.1.6**: React framework with App Router and Turbopack
+- **TypeScript 5**: Type-safe JavaScript
+- **Turso (libSQL)**: Distributed SQLite database with edge deployment
+- **IP address binding** for access codes (prevents sharing)
+- **Time-based one-time passwords** (TOTP) via Google Authenticator
+- **Payhip license validation** for purchase verification
+- **Secure SMTP email delivery** for QR codes
+- **Environment variable configuration** (never commit secrets)
+- **TypeScript** for compile-time type safety
+- **Lazy database initialization** (prevents build-time errors)
+
+## Known Issues & Solutions
+
+### Build Errors
+- **Problem**: `URL_INVALID: The URL 'undefined' is not in a valid format`
+- **Solution**: Environment variables are loaded at runtime, not build time. This is expected and won't affect production.
+
+### Next.js 15+ Breaking Changes
+- **searchParams** is now a Promise in async Server Components
+- All dynamic APIs must be awaited: `const params = await searchParams`
+
+## Troubleshooting
+
+**Q: APIs return 500 errors locally**  
+A: Ensure all environment variables are set in `.env.local`
+
+**Q: Payhip validation fails**  
+A: Verify `PAYHIP_API_KEY` is correct and the license key is active
+
+**Q: Email not sending**  
+A: Check SMTP credentials and ensure port 465 is not blocked by your firewall
+
+**Q: Build warnings about workspace root**  
+A: This is normal in monorepo setups. The build will still succeed.-first CSS framework
 ├── next.config.ts
 └── README.md
 ```

@@ -4,8 +4,9 @@ const otplib = require('otplib');
 import qrcode from 'qrcode';
 import client from '../../lib/turso';
 
-export default async function QRPage({ searchParams }: { searchParams: { code?: string } }) {
-  const code = searchParams.code;
+export default async function QRPage({ searchParams }: { searchParams: Promise<{ code?: string }> }) {
+  const params = await searchParams;
+  const code = params.code;
 
   if (!code) {
     return (

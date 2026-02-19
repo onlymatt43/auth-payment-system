@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-const otplib = require('otplib');
+import { verifySync } from 'otplib';
 import client from '../../../lib/turso';
 import axios from 'axios';
 
@@ -78,8 +78,9 @@ export async function POST(req: NextRequest) {
 
     const secret = result.rows[0].secret as string;
 
-    // Verify token
-    const isValid = otplib.authenticator.verify({ token, secret });
+    // Verify token using otplib functional API
+    const verifyResult = verifySync({ secret, token });
+    const isValid = verifyResult.valid;
 
     if (isValid) {
       return NextResponse.json({ valid: true });
