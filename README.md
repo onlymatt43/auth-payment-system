@@ -1,17 +1,18 @@
-# Auth Payment System
+# OnlyMatt Points - Boutique de Points avec PayPal
 
-A modular authentication and payment system integrating Payhip for exclusive content access using QR code-based TOTP (Time-based One-Time Password) authentication.
+Système centralisé d'achat et gestion de points pour accéder aux projets OnlyMatt. Intégration PayPal + Google OAuth + Turso.
 
-## Features
+## ✨ Features
 
-- **Payhip Integration**: Validates license keys for product access
-- **TOTP Authentication**: Secure QR code generation for Google Authenticator
-- **Email Delivery**: SMTP-based QR code delivery
-- **Database Storage**: Turso (libSQL) for storing access codes with IP binding
-- **Next.js API**: Serverless API routes for seamless integration
-- **TypeScript**: Full type safety
+- **Boutique de points**: Achat de packages via PayPal (50pts=$5, 200pts=$15, 500pts=$30)
+- **Google OAuth**: Connexion sécurisée (pas de passwords)
+- **Solde global**: Un compte email → un solde utilisable sur tous les projets
+- **Consommation flexible**: Chaque projet coûte X points configurables
+- **Valeurs modulables**: Ajuster $ et temps par point (promos faciles)
+- **Admin interface**: Gérer packages, projets, configuration en temps réel
+- **API publique**: project-links et autres projets peuvent consommer les points
 
-## Quick Start
+## 🏗️ Architecture
 
 ### Prerequisites
 
