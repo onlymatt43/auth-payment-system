@@ -4,6 +4,8 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 interface Transaction {
   id: number;
   type: string;

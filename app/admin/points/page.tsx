@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 interface PointPackage {
   id: number;
   name: string;
