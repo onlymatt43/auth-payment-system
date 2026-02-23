@@ -1,4 +1,8 @@
-export { default } from 'next-auth/middleware';
+import { auth } from './lib/auth';
+
+export default auth((req) => {
+  // Protection middleware (automatically handled by NextAuth)
+});
 
 export const config = {
   matcher: [
