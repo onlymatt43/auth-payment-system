@@ -76,7 +76,7 @@ export default function SlotsPage() {
       ]);
     }, 100);
 
-    // Call API
+    // Call server action directly
     const spinResult = await spinSlots(payWithPoints, payWithPoints ? pointsCost : 0);
 
     // Stop animation
@@ -90,9 +90,12 @@ export default function SlotsPage() {
     setResult(spinResult);
     setShowResult(true);
 
-    // Update balance if won
+    // Update balance if successful
     if (spinResult.success && spinResult.newBalance !== undefined) {
       setBalance(spinResult.newBalance);
+    } else {
+      // Refetch balance on error to ensure sync
+      await fetchBalance();
     }
 
     setIsSpinning(false);

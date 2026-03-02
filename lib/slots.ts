@@ -93,6 +93,15 @@ async function deductPoints(userId: number, amount: number) {
     `,
     args: [amount, userId],
   });
+
+  // Log transaction for spin cost
+  await client.execute({
+    sql: `
+      INSERT INTO transactions (user_id, type, points, metadata)
+      VALUES (?, 'slots_cost', ?, ?)
+    `,
+    args: [userId, -amount, JSON.stringify({ source: 'slot_machine_spin' })],
+  });
 }
 
 async function addPoints(userId: number, amount: number) {
