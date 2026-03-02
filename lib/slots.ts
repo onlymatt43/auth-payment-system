@@ -249,7 +249,10 @@ export async function spinSlots(payWithPoints: boolean = false, pointsCost: numb
       newBalance: (balanceResult.rows[0]?.points as number) || 0,
     };
   } catch (error) {
-    console.error('Spin error:', error);
+    const { createSafeLog } = await import('./log-sanitizer');
+    console.error('Spin error:', createSafeLog('Spin failed', {
+      error: error instanceof Error ? error.message : String(error),
+    }, ['EMAIL']));
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Spin failed',

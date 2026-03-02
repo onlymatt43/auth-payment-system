@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
 import client from '@/lib/turso';
 
-function verifyAdmin(req: NextRequest): boolean {
-  const password = req.headers.get('x-admin-password');
-  return password === process.env.ADMIN_PASSWORD;
+async function verifyAdminRole(): Promise<boolean> {
+  const session = await auth();
+  return session?.user?.role === 'admin';
 }
 
 /**
  * GET /api/admin/packages
+ * 🔒 Requires admin role via NextAuth
  */
 export async function GET(req: NextRequest) {
-  if (!verifyAdmin(req)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const isAdmin = await verifyAdminRole();
+  if (!isAdmin) {
+    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
   }
 
   try {
@@ -28,15 +31,30 @@ export async function GET(req: NextRequest) {
 
 /**
  * POST /api/admin/packages
+ * 🔒 Requires admin role via NextAuth
  */
 export async function POST(req: NextRequest) {
-  if (!verifyAdmin(req)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const isAdmin = await verifyAdminRole();
+  if (!isAdmin) {
+    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
   }
 
   try {
     const body = await req.json();
     const { name, points, price_usd } = body;
+
+    // Validate inputs
+    if (!name || !points || !price_usd) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    if (typeof points !== 'number' || points <= 0) {
+      return NextResponse.json({ error: 'Points must be positive number' }, { status: 400 });
+    }
+
+    if (typeof price_usd !== 'number' || price_usd <= 0 || price_usd > 1000) {
+      return NextResponse.json({ error: 'Price must be between 0 and 1000 USD' }, { status: 400 });
+    }
 
     await client.execute({
       sql: 'INSERT INTO point_packages (name, points, price_usd, active) VALUES (?, ?, ?, true)',
