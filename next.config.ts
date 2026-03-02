@@ -13,6 +13,37 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // Security headers for all routes
+        source: "/:path*",
+        headers: [
+          // HTTPS enforcement
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=31536000; includeSubDomains; preload",
+          },
+          // Prevent clickjacking
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+          // Prevent MIME type sniffing
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          // Enable XSS protection
+          {
+            key: "X-XSS-Protection",
+            value: "1; mode=block",
+          },
+          // Referrer policy
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+        ],
+      },
+      {
         // matching all API routes
         source: "/api/:path*",
         headers: [
