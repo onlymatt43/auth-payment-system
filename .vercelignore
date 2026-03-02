@@ -1,0 +1,37 @@
+# Development cache - not needed in production
+.next/dev
+
+# Git
+.git
+.gitignore
+
+# Local env files
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules
+.pnpm-store
+
+# Testing
+.pytest_cache
+__pycache__
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Others
+README.md
