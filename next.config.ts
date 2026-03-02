@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone", // Optimise pour Vercel deployment
   images: {
     remotePatterns: [
       {
