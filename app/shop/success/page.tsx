@@ -10,51 +10,74 @@ function SuccessContent() {
   const balance = searchParams.get('balance');
 
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-      <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-lg p-8 text-center">
-        <div className="mb-6">
-          <svg className="w-16 h-16 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        
-        <h1 className="text-3xl font-bold mb-4">Achat réussi!</h1>
-        
-        <div className="mb-6">
-          <p className="text-zinc-400 mb-2">Vous avez reçu</p>
-          <p className="text-5xl font-bold text-green-500">+{points} points</p>
+    <main className="min-h-screen bg-gradient-to-br from-dark-darker via-dark-navy to-dark-blue flex items-center justify-center p-6">
+      <div className="w-full max-w-2xl">
+        {/* Success Card */}
+        <div className="neon-border-yellow glass-dark rounded-3xl p-12 text-center transform animate-pulse">
+          {/* Checkmark Animation */}
+          <div className="flex justify-center mb-8">
+            <div className="relative w-24 h-24">
+              <div className="absolute inset-0 rounded-full border-4 border-neon-yellow opacity-20 animate-ping"></div>
+              <div className="absolute inset-0 flex items-center justify-center text-6xl">✨</div>
+            </div>
+          </div>
+          
+          <h1 className="text-5xl md:text-6xl font-black gradient-text mb-6">ACHAT RÉUSSI!</h1>
+          
+          {/* Points received */}
+          <div className="mb-8">
+            <p className="text-gray-400 text-sm tracking-widest font-bold mb-3">POINTS REÇUS</p>
+            <div className="text-6xl md:text-7xl font-black glow-yellow">+{points}</div>
+            <p className="text-neon-yellow font-bold text-lg mt-2">POINTS DÉBLOQUÉS</p>
+          </div>
+
+          {/* Balance display */}
+          <div className="neon-border-pink rounded-2xl p-8 mb-8 bg-dark-navy/50">
+            <p className="text-neon-pink text-xs tracking-widest font-bold mb-3">NOUVEAU SOLDE</p>
+            <div className="text-5xl font-black glow-pink">{balance}</div>
+            <p className="text-gray-400 text-sm mt-2">points disponibles</p>
+          </div>
+
+          {/* Decorative line */}
+          <div className="h-1 w-32 mx-auto mb-8 bg-gradient-to-r from-neon-yellow via-neon-pink to-neon-blue"></div>
+
+          {/* Action buttons */}
+          <div className="space-y-4">
+            <Link
+              href="/shop"
+              className="btn-neon w-full block text-center"
+            >
+              🛍️ RETOUR À LA BOUTIQUE
+            </Link>
+            <Link
+              href="/account"
+              className="btn-blue w-full block text-center"
+            >
+              👤 VOIR MON COMPTE
+            </Link>
+          </div>
         </div>
 
-        <div className="bg-zinc-800 rounded-lg p-4 mb-6">
-          <p className="text-sm text-zinc-400">Votre nouveau solde</p>
-          <p className="text-2xl font-bold">{balance} points</p>
-        </div>
-
-        <div className="space-y-3">
-          <Link
-            href="/shop"
-            className="block w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition"
-          >
-            Retour à la boutique
-          </Link>
-          <Link
-            href="/account"
-            className="block w-full bg-zinc-800 hover:bg-zinc-700 text-white py-3 rounded-lg font-semibold transition"
-          >
-            Voir mon compte
-          </Link>
+        {/* Footer message */}
+        <div className="mt-12 text-center">
+          <p className="text-gray-400 text-sm">
+            Vos points sont <span className="text-neon-yellow font-bold">disponibles immédiatement</span>
+          </p>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 
 export default function SuccessPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="animate-pulse text-zinc-400">Chargement...</div>
-      </div>
+      <main className="min-h-screen bg-gradient-to-br from-dark-darker via-dark-navy to-dark-blue flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4 animate-pulse glow-blue">⚡</div>
+          <p className="text-white text-lg glow-blue">Vérification en cours...</p>
+        </div>
+      </main>
     }>
       <SuccessContent />
     </Suspense>

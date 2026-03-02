@@ -3,12 +3,189 @@
 @tailwind utilities;
 
 :root {
-  --background: #000000;
+  --background: linear-gradient(135deg, #050710 0%, #0a0e27 50%, #1a1f3a 100%);
   --foreground: #ededed;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(135deg, #050710 0%, #0a0e27 50%, #1a1f3a 100%);
+  font-family: "Arial", "Helvetica", sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(255, 0, 110, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+main {
+  position: relative;
+  z-index: 1;
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: linear-gradient(90deg, #FFFF00, #FF006E, #00D9FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Neon Border */
+.neon-border {
+  border: 2px solid #FFFF00;
+  box-shadow: 0 0 20px rgba(255, 255, 0, 0.4), inset 0 0 20px rgba(255, 255, 0, 0.1);
+}
+
+.neon-border-pink {
+  border: 2px solid #FF006E;
+  box-shadow: 0 0 20px rgba(255, 0, 110, 0.4), inset 0 0 20px rgba(255, 0, 110, 0.1);
+}
+
+.neon-border-blue {
+  border: 2px solid #00D9FF;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.4), inset 0 0 20px rgba(0, 217, 255, 0.1);
+}
+
+/* Glass Effect */
+.glass {
+  background: rgba(26, 31, 58, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-dark {
+  background: rgba(5, 7, 16, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 0, 0.2);
+}
+
+/* Neon Glow Effects */
+.glow-yellow {
+  text-shadow: 0 0 20px rgba(255, 255, 0, 0.8), 0 0 40px rgba(255, 255, 0, 0.4);
+}
+
+.glow-pink {
+  text-shadow: 0 0 20px rgba(255, 0, 110, 0.8), 0 0 40px rgba(255, 0, 110, 0.4);
+}
+
+.glow-blue {
+  text-shadow: 0 0 20px rgba(0, 217, 255, 0.8), 0 0 40px rgba(0, 217, 255, 0.4);
+}
+
+/* Button Styles */
+.btn-neon {
+  padding: 12px 24px;
+  background: rgba(255, 255, 0, 0.1);
+  border: 2px solid #FFFF00;
+  color: #FFFF00;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(255, 255, 0, 0.2);
+}
+
+.btn-neon:hover {
+  background: rgba(255, 255, 0, 0.2);
+  box-shadow: 0 0 30px rgba(255, 255, 0, 0.6), inset 0 0 20px rgba(255, 255, 0, 0.1);
+  transform: scale(1.05);
+}
+
+.btn-pink {
+  padding: 12px 24px;
+  background: rgba(255, 0, 110, 0.1);
+  border: 2px solid #FF006E;
+  color: #FF006E;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(255, 0, 110, 0.2);
+}
+
+.btn-pink:hover {
+  background: rgba(255, 0, 110, 0.2);
+  box-shadow: 0 0 30px rgba(255, 0, 110, 0.6), inset 0 0 20px rgba(255, 0, 110, 0.1);
+  transform: scale(1.05);
+}
+
+.btn-blue {
+  padding: 12px 24px;
+  background: rgba(0, 217, 255, 0.1);
+  border: 2px solid #00D9FF;
+  color: #00D9FF;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+}
+
+.btn-blue:hover {
+  background: rgba(0, 217, 255, 0.2);
+  box-shadow: 0 0 30px rgba(0, 217, 255, 0.6), inset 0 0 20px rgba(0, 217, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.btn-yellow {
+  padding: 12px 24px;
+  background: rgba(255, 255, 0, 0.1);
+  border: 2px solid #FFFF00;
+  color: #FFFF00;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(255, 255, 0, 0.2);
+}
+
+.btn-yellow:hover {
+  background: rgba(255, 255, 0, 0.2);
+  box-shadow: 0 0 30px rgba(255, 255, 0, 0.6), inset 0 0 20px rgba(255, 255, 0, 0.1);
+  transform: scale(1.05);
+}
+
+/* Smooth Transitions */
+a, button {
+  transition: all 0.3s ease;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050710;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #FFFF00, #FF006E, #00D9FF);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  box-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
 }

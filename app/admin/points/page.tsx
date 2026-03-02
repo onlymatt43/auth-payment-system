@@ -131,168 +131,208 @@ export default function AdminPage() {
   }
 
   if (status === 'loading') {
-    return <div className="min-h-screen bg-black text-white flex items-center justify-center">Chargement...</div>;
-  }
-
-  if (!authenticated) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-        <form onSubmit={handleLogin} className="bg-zinc-900 border border-zinc-800 rounded-lg p-8 w-full max-w-md">
-          <h1 className="text-2xl font-bold mb-6">Admin - Système de Points</h1>
-          <input
-            type="password"
-            value={adminPassword}
-            onChange={(e) => setAdminPassword(e.target.value)}
-            placeholder="Mot de passe admin"
-            className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2 mb-4"
-          />
-          <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-semibold">
-            Se connecter
-          </button>
-        </form>
+      <div className="min-h-screen bg-gradient-to-br from-dark-darker via-dark-navy to-dark-blue flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4 animate-pulse glow-blue">⚡</div>
+          <p className="text-white text-lg glow-blue">Chargement...</p>
+        </div>
       </div>
     );
   }
 
+  if (!authenticated) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-dark-darker via-dark-navy to-dark-blue flex items-center justify-center p-6">
+        <form onSubmit={handleLogin} className="w-full max-w-md">
+          <div className="neon-border-yellow glass-dark rounded-3xl p-12">
+            <h1 className="text-4xl font-black gradient-text mb-2">ADMIN PANEL</h1>
+            <p className="text-gray-400 text-sm tracking-widest mb-8">Système de Points</p>
+            
+            <input
+              type="password"
+              value={adminPassword}
+              onChange={(e) => setAdminPassword(e.target.value)}
+              placeholder="Mot de passe admin"
+              className="w-full bg-dark-navy border border-neon-yellow rounded-lg px-4 py-3 text-white placeholder-gray-500 mb-6 focus:outline-none focus:border-neon-pink transition"
+            />
+            <button type="submit" className="btn-neon w-full">
+              🔑 SE CONNECTER
+            </button>
+          </div>
+        </form>
+      </main>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-black text-white p-6">
+    <main className="min-h-screen bg-gradient-to-br from-dark-darker via-dark-navy to-dark-blue text-white p-6 md:p-12">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8">Administration - Système de Points</h1>
+        {/* Header */}
+        <div className="mb-12">
+          <h1 className="text-5xl md:text-6xl font-black gradient-text mb-2">ADMINISTRATION</h1>
+          <p className="text-gray-400 text-sm tracking-widest">Système de Points & Configuration</p>
+          <div className="h-1 mt-4 bg-gradient-to-r from-neon-yellow via-neon-pink to-neon-blue"></div>
+        </div>
 
         {/* Configuration globale */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold mb-4">Configuration Globale</h2>
-          <div className="grid md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-sm text-zinc-400 mb-2">Valeur $ par point</label>
-              <input
-                type="number"
-                step="0.001"
-                value={newConfig.dollar || ''}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value);
-                  setNewConfig({ ...newConfig, dollar: isNaN(val) ? 0 : val });
-                }}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2"
-              />
-              <p className="text-xs text-zinc-500 mt-1">Actuel: ${config.point_dollar_value}</p>
-            </div>
-            <div>
-              <label className="block text-sm text-zinc-400 mb-2">Minutes par point</label>
-              <input
-                type="number"
-                value={newConfig.minutes || ''}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value);
-                  setNewConfig({ ...newConfig, minutes: isNaN(val) ? 0 : val });
-                }}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2"
-              />
-              <p className="text-xs text-zinc-500 mt-1">Actuel: {config.point_minutes_value} min</p>
-            </div>
+        <div className="mb-12">
+          <div className="flex items-center gap-4 mb-8">
+            <h2 className="text-3xl font-black">⚙️ CONFIGURATION</h2>
+            <div className="flex-1 h-1 bg-gradient-to-r from-neon-pink to-transparent"></div>
           </div>
-          <button onClick={updateConfig} className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded font-semibold">
-            Mettre à jour
-          </button>
+
+          <div className="neon-border-pink glass-dark rounded-3xl p-8">
+            <div className="grid md:grid-cols-2 gap-8 mb-8">
+              <div>
+                <label className="block text-neon-pink text-xs tracking-widest font-bold mb-3">💵 VALEUR $ PAR POINT</label>
+                <input
+                  type="number"
+                  step="0.001"
+                  value={newConfig.dollar || ''}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    setNewConfig({ ...newConfig, dollar: isNaN(val) ? 0 : val });
+                  }}
+                  className="w-full bg-dark-navy border border-neon-pink rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-neon-pink transition"
+                />
+                <p className="text-xs text-gray-400 mt-2">Actuel: <span className="text-neon-pink font-bold">${config.point_dollar_value}</span></p>
+              </div>
+              <div>
+                <label className="block text-neon-blue text-xs tracking-widest font-bold mb-3">⏱️ MINUTES PAR POINT</label>
+                <input
+                  type="number"
+                  value={newConfig.minutes || ''}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    setNewConfig({ ...newConfig, minutes: isNaN(val) ? 0 : val });
+                  }}
+                  className="w-full bg-dark-navy border border-neon-blue rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-neon-blue transition"
+                />
+                <p className="text-xs text-gray-400 mt-2">Actuel: <span className="text-neon-blue font-bold">{config.point_minutes_value} min</span></p>
+              </div>
+            </div>
+            <button onClick={updateConfig} className="btn-yellow w-full">
+              ✅ METTRE À JOUR
+            </button>
+          </div>
         </div>
 
         {/* Packages */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold mb-4">Packages de Points</h2>
-          
-          {/* Form nouveau package */}
-          <div className="grid md:grid-cols-4 gap-4 mb-6 pb-6 border-b border-zinc-800">
-            <input
-              type="text"
-              placeholder="Nom (Pack Starter)"
-              value={newPackage.name}
-              onChange={(e) => setNewPackage({ ...newPackage, name: e.target.value })}
-              className="bg-zinc-800 border border-zinc-700 rounded px-4 py-2"
-            />
-            <input
-              type="number"
-              placeholder="Points (50)"
-              value={newPackage.points || ''}
-              onChange={(e) => setNewPackage({...newPackage, points: parseInt(e.target.value) || 0 })}
-              className="bg-zinc-800 border border-zinc-700 rounded px-4 py-2"
-            />
-            <input
-              type="number"
-              step="0.01"
-              placeholder="Prix USD (5.00)"
-              value={newPackage.price_usd || ''}
-              onChange={(e) => setNewPackage({ ...newPackage, price_usd: parseFloat(e.target.value) || 0 })}
-              className="bg-zinc-800 border border-zinc-700 rounded px-4 py-2"
-            />
-            <button onClick={createPackage} className="bg-blue-600 hover:bg-blue-700 py-2 rounded font-semibold">
-              Créer
-            </button>
+        <div className="mb-12">
+          <div className="flex items-center gap-4 mb-8">
+            <h2 className="text-3xl font-black">📦 PACKAGES</h2>
+            <div className="flex-1 h-1 bg-gradient-to-r from-neon-yellow to-transparent"></div>
           </div>
 
-          {/* Liste packages */}
-          <table className="w-full">
-            <thead>
-              <tr className="text-left text-zinc-400 text-sm">
-                <th className="pb-2">Nom</th>
-                <th className="pb-2">Points</th>
-                <th className="pb-2">Prix (USD)</th>
-                <th className="pb-2">$/pt</th>
-                <th className="pb-2">Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              {packages.map((pkg) => (
-                <tr key={pkg.id} className="border-t border-zinc-800">
-                  <td className="py-3">{pkg.name}</td>
-                  <td>{pkg.points}</td>
-                  <td>${pkg.price_usd.toFixed(2)}</td>
-                  <td className="text-zinc-500">${(pkg.price_usd / pkg.points).toFixed(3)}</td>
-                  <td>
-                    <span className={pkg.active ? 'text-green-500' : 'text-zinc-500'}>
-                      {pkg.active ? 'Actif' : 'Inactif'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="neon-border-yellow glass-dark rounded-3xl p-8">
+            {/* Form nouveau package */}
+            <div className="mb-8 pb-8 border-b border-neon-yellow/30">
+              <p className="text-neon-yellow text-xs tracking-widest font-bold mb-4">➕ CRÉER UN NOUVEAU PACKAGE</p>
+              <div className="grid md:grid-cols-5 gap-4">
+                <input
+                  type="text"
+                  placeholder="Nom (Pack Starter)"
+                  value={newPackage.name}
+                  onChange={(e) => setNewPackage({ ...newPackage, name: e.target.value })}
+                  className="bg-dark-navy border border-neon-yellow rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-neon-yellow transition"
+                />
+                <input
+                  type="number"
+                  placeholder="Points (50)"
+                  value={newPackage.points || ''}
+                  onChange={(e) => setNewPackage({...newPackage, points: parseInt(e.target.value) || 0 })}
+                  className="bg-dark-navy border border-neon-yellow rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-neon-yellow transition"
+                />
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="Prix USD (5.00)"
+                  value={newPackage.price_usd || ''}
+                  onChange={(e) => setNewPackage({ ...newPackage, price_usd: parseFloat(e.target.value) || 0 })}
+                  className="bg-dark-navy border border-neon-yellow rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-neon-yellow transition"
+                />
+                <button onClick={createPackage} className="btn-neon">
+                  CRÉER
+                </button>
+              </div>
+            </div>
+
+            {/* Liste packages */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-neon-yellow text-xs tracking-widest font-bold border-b border-neon-yellow/30">
+                    <th className="pb-4 text-left">NOM</th>
+                    <th className="pb-4 text-center">POINTS</th>
+                    <th className="pb-4 text-center">PRIX (USD)</th>
+                    <th className="pb-4 text-center">$/PT</th>
+                    <th className="pb-4 text-center">STATUT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {packages.map((pkg) => (
+                    <tr key={pkg.id} className="border-b border-neon-yellow/10 hover:border-neon-yellow/30 transition">
+                      <td className="py-4 font-bold">{pkg.name}</td>
+                      <td className="py-4 text-center text-neon-yellow">{pkg.points}</td>
+                      <td className="py-4 text-center">${pkg.price_usd.toFixed(2)}</td>
+                      <td className="py-4 text-center text-gray-400">${(pkg.price_usd / pkg.points).toFixed(3)}</td>
+                      <td className="py-4 text-center">
+                        <span className={pkg.active ? 'text-neon-yellow font-bold' : 'text-gray-500'}>
+                          {pkg.active ? '✓ ACTIF' : '✗ INACTIF'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         {/* Coûts projets */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
-          <h2 className="text-2xl font-bold mb-4">Coûts des Projets</h2>
-          <table className="w-full">
-            <thead>
-              <tr className="text-left text-zinc-400 text-sm">
-                <th className="pb-2">Slug</th>
-                <th className="pb-2">Nom</th>
-                <th className="pb-2">Points requis</th>
-                <th className="pb-2">Durée (config actuelle)</th>
-                <th className="pb-2">Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.map((proj) => {
-                const minutes = proj.points_required * config.point_minutes_value;
-                const hours = (minutes / 60).toFixed(1);
-                return (
-                  <tr key={proj.id} className="border-t border-zinc-800">
-                    <td className="py-3"><code className="text-sm bg-zinc-800 px-2 py-1 rounded">{proj.project_slug}</code></td>
-                    <td>{proj.project_name}</td>
-                    <td className="font-bold">{proj.points_required} pts</td>
-                    <td className="text-zinc-400">{hours}h ({minutes}min)</td>
-                    <td>
-                      <span className={proj.active ? 'text-green-500' : 'text-zinc-500'}>
-                        {proj.active ? 'Actif' : 'Inactif'}
-                      </span>
-                    </td>
+        <div>
+          <div className="flex items-center gap-4 mb-8">
+            <h2 className="text-3xl font-black">🎮 PROJETS</h2>
+            <div className="flex-1 h-1 bg-gradient-to-r from-neon-blue to-transparent"></div>
+          </div>
+
+          <div className="neon-border-blue glass-dark rounded-3xl p-8">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-neon-blue text-xs tracking-widest font-bold border-b border-neon-blue/30">
+                    <th className="pb-4 text-left">SLUG</th>
+                    <th className="pb-4 text-left">NOM</th>
+                    <th className="pb-4 text-center">POINTS REQUIS</th>
+                    <th className="pb-4 text-center">DURÉE (CONFIG)</th>
+                    <th className="pb-4 text-center">STATUT</th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                </thead>
+                <tbody>
+                  {projects.map((proj) => {
+                    const minutes = proj.points_required * config.point_minutes_value;
+                    const hours = (minutes / 60).toFixed(1);
+                    return (
+                      <tr key={proj.id} className="border-b border-neon-blue/10 hover:border-neon-blue/30 transition">
+                        <td className="py-4"><code className="bg-dark-navy px-3 py-1 rounded text-neon-blue text-xs">{proj.project_slug}</code></td>
+                        <td className="py-4 font-bold">{proj.project_name}</td>
+                        <td className="py-4 text-center text-neon-blue">{proj.points_required} pts</td>
+                        <td className="py-4 text-center text-gray-400">{hours}h ({minutes}min)</td>
+                        <td className="py-4 text-center">
+                          <span className={proj.active ? 'text-neon-blue font-bold' : 'text-gray-500'}>
+                            {proj.active ? '✓ ACTIF' : '✗ INACTIF'}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

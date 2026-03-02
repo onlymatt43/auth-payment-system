@@ -92,97 +92,187 @@ export default function ShopPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p>Chargement...</p>
+      <div className="min-h-screen bg-gradient-to-br from-dark-darker via-dark-navy to-dark-blue flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4 animate-pulse glow-blue">⚡</div>
+          <p className="text-white text-lg glow-blue">Chargement...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-12 text-center">
-          <h1 className="text-4xl font-bold mb-4">Boutique de Points</h1>
-          <p className="text-zinc-400">Achetez des points pour accéder à vos projets favoris</p>
+    <main className="min-h-screen bg-gradient-to-br from-dark-darker via-dark-navy to-dark-blue text-white p-6 md:p-12">
+      <div className="max-w-7xl mx-auto">
+        {/* Header avec Hero */}
+        <div className="mb-16 relative overflow-hidden rounded-3xl">
+          <div className="relative z-10 py-12 px-8 md:px-16 text-center">
+            {/* Ligne décorative supérieure */}
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-neon-yellow to-transparent"></div>
+              <span className="text-neon-yellow text-2xl">⚡</span>
+              <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-neon-yellow to-transparent"></div>
+            </div>
+            
+            <h1 className="text-5xl md:text-6xl font-black mb-4 tracking-tighter">
+              <span className="gradient-text">POINT$</span>
+            </h1>
+            <p className="text-lg text-gray-300 mb-6 max-w-2xl mx-auto">
+              <span className="text-neon-pink">UNLOCK</span> premium access • <span className="text-neon-blue">UNLIMITED</span> possibilities
+            </p>
+
+            {/* Ligne décorative inférieure */}
+            <div className="flex items-center justify-center gap-4">
+              <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-neon-pink to-transparent"></div>
+              <span className="text-neon-pink">✦</span>
+              <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-neon-pink to-transparent"></div>
+            </div>
+          </div>
         </div>
 
-        {/* Solde */}
+        {/* Solde utilisateur */}
         {session && balance && (
-          <div className="mb-8 bg-zinc-900 border border-zinc-800 rounded-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-sm text-zinc-400">Votre solde</p>
-                <p className="text-3xl font-bold">{balance.points} points</p>
+          <div className="mb-12 relative group">
+            <div className="neon-border-yellow glass rounded-3xl p-8 md:p-12 transform hover:scale-105 transition duration-300">
+              <div className="grid md:grid-cols-3 gap-8">
+                <div>
+                  <p className="text-neon-yellow text-xs tracking-widest font-bold mb-2">VOTRE SOLDE</p>
+                  <p className="text-4xl md:text-5xl font-black glow-yellow">{balance.points}</p>
+                  <p className="text-gray-400 text-sm mt-2">POINTS DISPONIBLES</p>
+                </div>
+                <div className="hidden md:flex items-center justify-center">
+                  <div className="w-1 h-20 bg-gradient-to-b from-neon-yellow via-neon-pink to-neon-blue"></div>
+                </div>
+                <div className="text-right">
+                  <p className="text-neon-pink text-xs tracking-widest font-bold mb-2">TOTAL ACHETÉ</p>
+                  <p className="text-4xl md:text-5xl font-black glow-pink">{balance.total_purchased}</p>
+                  <p className="text-gray-400 text-sm mt-2">POINTS PTS</p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-sm text-zinc-400">Total acheté</p>
-                <p className="text-xl">{balance.total_purchased} pts</p>
+              <button
+                onClick={() => router.push('/account')}
+                className="btn-neon w-full mt-8"
+              >
+                ⚡ MON COMPTE & HISTORIQUE
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Packages Grid */}
+        <div className="mb-16">
+          <div className="flex items-center gap-4 mb-8">
+            <h2 className="text-3xl md:text-4xl font-black gradient-text">PACKAGES</h2>
+            <div className="flex-1 h-1 bg-gradient-to-r from-neon-yellow via-neon-pink to-neon-blue"></div>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {packages.filter(pkg => pkg.active).map((pkg, index) => {
+              const valuePerPoint = (pkg.price_usd / pkg.points).toFixed(3);
+              const colors = [
+                { border: 'neon-border-yellow', glow: 'glow-yellow', btn: 'btn-neon', accent: 'text-neon-yellow' },
+                { border: 'neon-border-pink', glow: 'glow-pink', btn: 'btn-pink', accent: 'text-neon-pink' },
+                { border: 'neon-border-blue', glow: 'glow-blue', btn: 'btn-blue', accent: 'text-neon-blue' },
+              ];
+              const color = colors[index % colors.length];
+              
+              return (
+                <div
+                  key={pkg.id}
+                  className={`${color.border} glass-dark rounded-3xl p-8 transform hover:scale-105 transition duration-300 relative overflow-hidden group`}
+                >
+                  {/* Background animate */}
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                  
+                  <div className={`text-xs tracking-widest font-bold mb-4 ${color.accent}`}>
+                    {index === 0 ? '⭐ STARTER' : index === 1 ? '💎 PRO' : '👑 PREMIUM'}
+                  </div>
+                  
+                  <h3 className={`text-2xl font-black mb-6 ${color.glow}`}>{pkg.name}</h3>
+                  
+                  <div className="mb-6 py-6 border-t border-b border-gray-700">
+                    <p className={`text-5xl font-black ${color.accent} mb-2`}>{pkg.points}</p>
+                    <p className="text-gray-400 text-sm">POINTS</p>
+                  </div>
+                  
+                  <div className="mb-8 space-y-2">
+                    <p className="text-3xl font-black">${pkg.price_usd.toFixed(2)}</p>
+                    <p className="text-gray-400 text-xs">
+                      <span className={color.accent}>${valuePerPoint}</span> par point
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => handlePurchase(pkg.id)}
+                    disabled={purchasing === pkg.id}
+                    className={`${color.btn} w-full disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition duration-300`}
+                  >
+                    {purchasing === pkg.id ? '⏳ PROCESSING...' : '🚀 ACHETER MAINTENANT'}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Info Section */}
+        <div className="mb-12">
+          <div className="flex items-center gap-4 mb-8">
+            <h2 className="text-2xl md:text-3xl font-black">COMMENT ÇA MARCHE?</h2>
+            <div className="flex-1 h-1 bg-gradient-to-r from-neon-blue to-transparent"></div>
+          </div>
+          
+          <div className="neon-border-blue glass rounded-3xl p-8 md:p-12">
+            <div className="grid md:grid-cols-4 gap-6">
+              <div className="space-y-4">
+                <div className="text-3xl glow-blue">1️⃣</div>
+                <h3 className="font-black text-neon-blue">CONNECTEZ-VOUS</h3>
+                <p className="text-sm text-gray-400">Avec votre compte Google</p>
+              </div>
+              <div className="space-y-4">
+                <div className="text-3xl glow-pink">2️⃣</div>
+                <h3 className="font-black text-neon-pink">SÉLECTIONNEZ</h3>
+                <p className="text-sm text-gray-400">Un package de points</p>
+              </div>
+              <div className="space-y-4">
+                <div className="text-3xl glow-yellow">3️⃣</div>
+                <h3 className="font-black text-neon-yellow">PAYEZ</h3>
+                <p className="text-sm text-gray-400">Sécurisé via PayPal</p>
+              </div>
+              <div className="space-y-4">
+                <div className="text-3xl">🔓</div>
+                <h3 className="font-black">DÉBLOQUEZ</h3>
+                <p className="text-sm text-gray-400">Accès illimité immédiat</p>
               </div>
             </div>
-            <button
-              onClick={() => router.push('/account')}
-              className="w-full bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-lg text-sm font-semibold transition"
-            >
-              📊 Voir mon compte et historique
-            </button>
           </div>
-        )}
-
-        {/* Packages */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          {packages.filter(pkg => pkg.active).map((pkg) => {
-            const valuePerPoint = (pkg.price_usd / pkg.points).toFixed(3);
-            
-            return (
-              <div
-                key={pkg.id}
-                className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 hover:border-zinc-700 transition"
-              >
-                <h3 className="text-xl font-bold mb-2">{pkg.name}</h3>
-                <div className="mb-4">
-                  <p className="text-4xl font-bold">{pkg.points}</p>
-                  <p className="text-sm text-zinc-400">points</p>
-                </div>
-                <div className="mb-6">
-                  <p className="text-2xl">${pkg.price_usd.toFixed(2)} USD</p>
-                  <p className="text-xs text-zinc-500">${valuePerPoint} par point</p>
-                </div>
-                <button
-                  onClick={() => handlePurchase(pkg.id)}
-                  disabled={purchasing === pkg.id}
-                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-700 text-white py-3 rounded-lg font-semibold transition"
-                >
-                  {purchasing === pkg.id ? 'Redirection...' : 'Acheter'}
-                </button>
-              </div>
-            );
-          })}
         </div>
 
-        {/* Info */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
-          <h3 className="font-bold mb-4">Comment ça marche?</h3>
-          <ol className="space-y-2 text-sm text-zinc-300">
-            <li>1. Connectez-vous avec votre compte Google</li>
-            <li>2. Achetez un package de points via PayPal</li>
-            <li>3. Utilisez vos points pour accéder aux projets</li>
-            <li>4. Chaque point = 6 minutes d'accès (ajustable selon promotions)</li>
-          </ol>
-        </div>
-
-        {/* Auth */}
+        {/* CTA Section */}
         {!session && (
-          <div className="mt-8 text-center">
-            <button
-              onClick={() => signIn('google')}
-              className="bg-white text-black px-8 py-3 rounded-lg font-semibold hover:bg-zinc-200 transition"
-            >
-              Se connecter avec Google
-            </button>
+          <div className="relative overflow-hidden rounded-3xl">
+            <div className="neon-border-pink glass py-12 px-8 text-center">
+              <h2 className="text-3xl md:text-4xl font-black mb-6 gradient-text">PRÊT À COMMENCER?</h2>
+              <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
+                Connectez-vous avec Google pour accéder à tous les packages et débloquer vos projets favoris
+              </p>
+              <button
+                onClick={() => signIn('google')}
+                className="btn-pink"
+              >
+                🔐 SE CONNECTER AVEC GOOGLE
+              </button>
+            </div>
           </div>
         )}
+
+        {/* Footer decoration */}
+        <div className="mt-16 flex items-center justify-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-neon-yellow"></div>
+          <div className="w-2 h-2 rounded-full bg-neon-pink"></div>
+          <div className="w-2 h-2 rounded-full bg-neon-blue"></div>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
