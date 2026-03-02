@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "./providers";
+import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "OnlyMatt Points - Boutique",
@@ -14,8 +15,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className="antialiased">
-        <Providers>{children}</Providers>
+      <body className="antialiased flex flex-col min-h-screen">
+        <div className="flex-1">
+          <Providers>{children}</Providers>
+        </div>
+        <Footer />
       </body>
     </html>
   );

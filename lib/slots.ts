@@ -110,24 +110,24 @@ async function checkDailyFreeSpinEligibility(userId: number) {
 async function deductPoints(userId: number, amount: number) {
   const result = await client.execute({
     sql: `
-      SELECT points FROM users WHERE id = ?
+      SELECT balance FROM users_points WHERE user_id = ?
     `,
     args: [userId],
   });
 
   if (result.rows.length === 0) {
-    throw new Error('User not found');
+    throw new Error('User balance not found');
   }
 
-  const currentPoints = (result.rows[0].points as number) || 0;
+  const currentBalance = (result.rows[0].balance as number) || 0;
 
-  if (currentPoints < amount) {
+  if (currentBalance < amount) {
     throw new Error('Insufficient points');
   }
 
   await client.execute({
     sql: `
-      UPDATE users SET points = points - ? WHERE id = ?
+      UPDATE users_points SET balance = balance - ? WHERE user_id = ?
     `,
     args: [amount, userId],
   });
@@ -135,28 +135,37 @@ async function deductPoints(userId: number, amount: number) {
   // Log transaction for spin cost
   await client.execute({
     sql: `
-      INSERT INTO transactions (user_id, type, points, metadata)
-      VALUES (?, 'slots_cost', ?, ?)
+      INSERT INTO transactions (user_id, type, amount, balance_before, balance_after)
+      VALUES (?, 'slots_cost', ?, ?, ?)
     `,
-    args: [userId, -amount, JSON.stringify({ source: 'slot_machine_spin' })],
+    args: [userId, -amount, currentBalance, currentBalance - amount],
   });
 }
 
 async function addPoints(userId: number, amount: number) {
+  const result = await client.execute({
+    sql: `
+      SELECT balance FROM users_points WHERE user_id = ?
+    `,
+    args: [userId],
+  });
+
+  const currentBalance = (result.rows[0]?.balance as number) || 0;
+
   await client.execute({
     sql: `
-      UPDATE users SET points = points + ? WHERE id = ?
+      UPDATE users_points SET balance = balance + ?, total_earned = total_earned + ? WHERE user_id = ?
     `,
-    args: [amount, userId],
+    args: [amount, amount, userId],
   });
 
   // Log transaction
   await client.execute({
     sql: `
-      INSERT INTO transactions (user_id, type, points, metadata)
-      VALUES (?, 'slots_win', ?, ?)
+      INSERT INTO transactions (user_id, type, amount, balance_before, balance_after)
+      VALUES (?, 'slots_win', ?, ?, ?)
     `,
-    args: [userId, amount, JSON.stringify({ source: 'slot_machine' })],
+    args: [userId, amount, currentBalance, currentBalance + amount],
   });
 }
 
@@ -236,7 +245,7 @@ export async function spinSlots(payWithPoints: boolean = false, pointsCost: numb
 
     // Get updated balance
     const balanceResult = await client.execute({
-      sql: `SELECT points FROM users WHERE id = ?`,
+      sql: `SELECT balance FROM users_points WHERE user_id = ?`,
       args: [userId],
     });
 
@@ -246,7 +255,7 @@ export async function spinSlots(payWithPoints: boolean = false, pointsCost: numb
       reels: outcome.reels,
       multiplier: outcome.multiplier,
       isJackpot: outcome.jackpot || false,
-      newBalance: (balanceResult.rows[0]?.points as number) || 0,
+      newBalance: (balanceResult.rows[0]?.balance as number) || 0,
     };
   } catch (error) {
     const { createSafeLog } = await import('./log-sanitizer');

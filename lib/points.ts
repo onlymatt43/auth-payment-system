@@ -6,21 +6,22 @@ import client from './turso';
 
 export interface UserBalance {
   id: number;
-  email: string;
-  points: number;
+  user_id: number;
+  balance: number;
+  total_earned: number;
   total_spent: number;
-  total_purchased: number;
   created_at: string;
   updated_at: string;
 }
 
 export interface PointTransaction {
   id: number;
-  email: string;
-  type: 'purchase' | 'spend' | 'refund' | 'bonus';
-  points: number;
+  user_id: number;
+  type: string;
+  amount: number;
   balance_after: number;
-  metadata?: string; // JSON
+  description?: string;
+  metadata?: string;
   created_at: string;
 }
 
@@ -32,12 +33,33 @@ export interface PointConfig {
 }
 
 /**
+ * Get user ID from email
+ */
+async function getUserIdFromEmail(email: string): Promise<number | null> {
+  const result = await client.execute({
+    sql: 'SELECT id FROM users WHERE email = ?',
+    args: [email],
+  });
+
+  if (result.rows.length === 0) {
+    return null;
+  }
+
+  return result.rows[0].id as number;
+}
+
+/**
  * Récupère le solde d'un utilisateur
  */
 export async function getUserBalance(email: string): Promise<UserBalance | null> {
+  const userId = await getUserIdFromEmail(email);
+  if (!userId) {
+    return null;
+  }
+
   const result = await client.execute({
-    sql: 'SELECT * FROM user_balances WHERE email = ?',
-    args: [email],
+    sql: 'SELECT * FROM users_points WHERE user_id = ?',
+    args: [userId],
   });
 
   if (result.rows.length === 0) {
@@ -50,13 +72,18 @@ export async function getUserBalance(email: string): Promise<UserBalance | null>
 /**
  * Crée un solde initial pour un nouvel utilisateur  
  */
-export async function createUserBalance(email: string): Promise<UserBalance> {
+export async function createUserBalance(email: string): Promise<UserBalance | null> {
+  const userId = await getUserIdFromEmail(email);
+  if (!userId) {
+    return null;
+  }
+
   await client.execute({
-    sql: 'INSERT INTO user_balances (email, points) VALUES (?, 0)',
-    args: [email],
+    sql: 'INSERT INTO users_points (user_id, balance, total_earned, total_spent) VALUES (?, 0, 0, 0)',
+    args: [userId],
   });
 
-  return getUserBalance(email) as Promise<UserBalance>;
+  return getUserBalance(email);
 }
 
 /**
@@ -65,36 +92,45 @@ export async function createUserBalance(email: string): Promise<UserBalance> {
 export async function creditPoints(
   email: string,
   points: number,
-  type: 'purchase' | 'refund' | 'bonus' = 'purchase',
+  type: 'purchase' | 'spend' | 'refund' | 'bonus' = 'purchase',
   metadata?: Record<string, any>
-): Promise<UserBalance> {
+): Promise<UserBalance | null> {
+  const userId = await getUserIdFromEmail(email);
+  if (!userId) {
+    return null;
+  }
+
   // Récupère ou crée le solde
   let balance = await getUserBalance(email);
   if (!balance) {
     balance = await createUserBalance(email);
   }
 
-  const newBalance = balance.points + points;
-  const newTotalPurchased = type === 'purchase' ? balance.total_purchased + points : balance.total_purchased;
+  if (!balance) {
+    return null;
+  }
+
+  const newBalance = balance.balance + points;
+  const newTotalEarned = type === 'purchase' || type === 'bonus' ? balance.total_earned + points : balance.total_earned;
 
   // Met à jour le solde
   await client.execute({
-    sql: `UPDATE user_balances 
-          SET points = ?, 
-              total_purchased = ?,
+    sql: `UPDATE users_points 
+          SET balance = ?, 
+              total_earned = ?,
               updated_at = CURRENT_TIMESTAMP 
-          WHERE email = ?`,
-    args: [newBalance, newTotalPurchased, email],
+          WHERE user_id = ?`,
+    args: [newBalance, newTotalEarned, userId],
   });
 
   // Enregistre la transaction
   await client.execute({
-    sql: `INSERT INTO point_transactions (email, type, points, balance_after, metadata)
-          VALUES (?, ?, ?, ?, ?)`,
-    args: [email, type, points, newBalance, metadata ? JSON.stringify(metadata) : null],
+    sql: `INSERT INTO transactions (user_id, type, amount, balance_after, description, metadata)
+          VALUES (?, ?, ?, ?, ?, ?)`,
+    args: [userId, type, points, newBalance, '', metadata ? JSON.stringify(metadata) : null],
   });
 
-  return getUserBalance(email) as Promise<UserBalance>;
+  return getUserBalance(email);
 }
 
 /**
@@ -104,38 +140,43 @@ export async function debitPoints(
   email: string,
   points: number,
   metadata?: Record<string, any>
-): Promise<UserBalance> {
+): Promise<UserBalance | null> {
+  const userId = await getUserIdFromEmail(email);
+  if (!userId) {
+    return null;
+  }
+
   const balance = await getUserBalance(email);
   
   if (!balance) {
     throw new Error('User balance not found');
   }
 
-  if (balance.points < points) {
+  if (balance.balance < points) {
     throw new Error('Insufficient points');
   }
 
-  const newBalance = balance.points - points;
+  const newBalance = balance.balance - points;
   const newTotalSpent = balance.total_spent + points;
 
   // Met à jour le solde
   await client.execute({
-    sql: `UPDATE user_balances 
-          SET points = ?, 
+    sql: `UPDATE users_points 
+          SET balance = ?, 
               total_spent = ?,
               updated_at = CURRENT_TIMESTAMP 
-          WHERE email = ?`,
-    args: [newBalance, newTotalSpent, email],
+          WHERE user_id = ?`,
+    args: [newBalance, newTotalSpent, userId],
   });
 
   // Enregistre la transaction
   await client.execute({
-    sql: `INSERT INTO point_transactions (email, type, points, balance_after, metadata)
-          VALUES (?, 'spend', ?, ?, ?)`,
-    args: [email, points, newBalance, metadata ? JSON.stringify(metadata) : null],
+    sql: `INSERT INTO transactions (user_id, type, amount, balance_after, description, metadata)
+          VALUES (?, 'spend', ?, ?, ?, ?)`,
+    args: [userId, points, newBalance, '', metadata ? JSON.stringify(metadata) : null],
   });
 
-  return getUserBalance(email) as Promise<UserBalance>;
+  return getUserBalance(email);
 }
 
 /**
@@ -145,12 +186,17 @@ export async function getTransactionHistory(
   email: string,
   limit = 50
 ): Promise<PointTransaction[]> {
+  const userId = await getUserIdFromEmail(email);
+  if (!userId) {
+    return [];
+  }
+
   const result = await client.execute({
-    sql: `SELECT * FROM point_transactions 
-          WHERE email = ? 
+    sql: `SELECT * FROM transactions 
+          WHERE user_id = ? 
           ORDER BY created_at DESC 
           LIMIT ?`,
-    args: [email, limit],
+    args: [userId, limit],
   });
 
   return result.rows as any as PointTransaction[];

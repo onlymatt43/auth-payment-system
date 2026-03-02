@@ -47,12 +47,12 @@ export async function POST(req: NextRequest) {
     // Vérifier le solde
     const balance = await getUserBalance(email);
     
-    if (!balance || balance.points < points_required) {
+    if (!balance || balance.balance < points_required) {
       return NextResponse.json(
         {
           error: 'Insufficient points',
           required: points_required,
-          available: balance?.points || 0,
+          available: balance?.balance || 0,
         },
         { status: 402 } // Payment Required
       );
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       points_spent: points_required,
-      balance_remaining: newBalance.points,
+      balance_remaining: newBalance?.balance || 0,
       session: {
         duration_minutes: sessionMinutes,
         duration_hours: sessionMinutes / 60,
@@ -142,13 +142,13 @@ export async function GET(req: NextRequest) {
     const project = projectResult.rows[0] as any;
     const balance = await getUserBalance(email);
 
-    const hasEnough = balance ? balance.points >= project.points_required : false;
+    const hasEnough = balance ? balance.balance >= project.points_required : false;
 
     return NextResponse.json({
       has_enough: hasEnough,
       required: project.points_required,
-      available: balance?.points || 0,
-      shortfall: hasEnough ? 0 : project.points_required - (balance?.points || 0),
+      available: balance?.balance || 0,
+      shortfall: hasEnough ? 0 : project.points_required - (balance?.balance || 0),
       project: {
         slug: project.project_slug,
         name: project.project_name,

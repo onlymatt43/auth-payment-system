@@ -52,14 +52,31 @@ export const authConfig = {
         // Fetch user role from database on first login
         try {
           const result = await client.execute({
-            sql: 'SELECT role FROM users WHERE email = ?',
+            sql: 'SELECT id, role FROM users WHERE email = ?',
             args: [user.email],
           });
 
           if (result.rows.length > 0) {
             token.role = result.rows[0].role || 'user';
+            token.userId = result.rows[0].id;
           } else {
-            token.role = 'user';
+            // Create user on first login if doesn't exist
+            try {
+              const insertResult = await client.execute({
+                sql: `INSERT INTO users (name, email, image, role) 
+                      VALUES (?, ?, ?, 'user') 
+                      RETURNING id, role`,
+                args: [user.name || '', user.email, user.image || null],
+              });
+              
+              if (insertResult.rows.length > 0) {
+                token.userId = insertResult.rows[0].id;
+                token.role = 'user';
+              }
+            } catch (insertError) {
+              console.error('Error creating user:', insertError instanceof Error ? insertError.message : 'Unknown error');
+              token.role = 'user';
+            }
           }
         } catch (error) {
           console.error('Error fetching user role:', error instanceof Error ? error.message : 'Unknown error');

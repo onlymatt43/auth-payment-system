@@ -24,12 +24,21 @@ export async function GET(req: NextRequest) {
     
     if (!balance) {
       // Pas encore de solde = nouveau utilisateur
+      // Initialize user points
+      const initialized = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3001'}/api/init-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': req.headers.get('cookie') || '',
+        },
+      });
+
       return NextResponse.json({
         email,
-        points: 0,
+        balance: 0,
+        total_earned: 0,
         total_spent: 0,
-        total_purchased: 0,
-        transactions: [],
+        recent_transactions: [],
       });
     }
 
@@ -37,25 +46,23 @@ export async function GET(req: NextRequest) {
     const transactions = await getTransactionHistory(email, 10);
 
     return NextResponse.json({
-      email: balance.email,
-      points: balance.points,
+      email,
+      balance: balance.balance,
+      total_earned: balance.total_earned,
       total_spent: balance.total_spent,
-      total_purchased: balance.total_purchased,
       created_at: balance.created_at,
       updated_at: balance.updated_at,
       recent_transactions: transactions.map(t => ({
         type: t.type,
-        points: t.points,
+        amount: t.amount,
         balance_after: t.balance_after,
         created_at: t.created_at,
-        ...(t.metadata ? { metadata: JSON.parse(t.metadata) } : {}),
       })),
     });
-
-  } catch (error: any) {
-    console.error('Balance fetch error:', error);
+  } catch (error) {
+    console.error('Error fetching balance:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch balance' },
+      { error: 'Failed to fetch balance' },
       { status: 500 }
     );
   }

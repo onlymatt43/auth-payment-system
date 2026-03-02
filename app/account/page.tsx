@@ -9,17 +9,16 @@ export const dynamic = 'force-dynamic';
 interface Transaction {
   id: number;
   type: string;
-  points: number;
+  amount: number;
   balance_after: number;
   created_at: string;
-  metadata?: any;
 }
 
 interface AccountData {
   email: string;
-  points: number;
+  balance: number;
   total_spent: number;
-  total_purchased: number;
+  total_earned: number;
   created_at: string;
   updated_at: string;
   transactions: Transaction[];
@@ -98,9 +97,8 @@ export default function AccountPage() {
         icon: '📈',
       };
     } else if (tx.type === 'spend') {
-      const projectName = tx.metadata?.project_slug || 'Projet';
       return {
-        label: `🔓 Accès ${projectName}`,
+        label: '🔓 Accès Projet',
         color: 'text-neon-pink',
         sign: '-',
         icon: '⚙️',
@@ -155,14 +153,14 @@ export default function AccountPage() {
           {/* Current Balance */}
           <div className="neon-border-yellow glass-dark rounded-3xl p-8 transform hover:scale-105 transition duration-300">
             <div className="text-neon-yellow text-xs tracking-widest font-bold mb-4">💰 SOLDE ACTUEL</div>
-            <div className="text-5xl font-black glow-yellow mb-4">{accountData.points}</div>
+            <div className="text-5xl font-black glow-yellow mb-4">{accountData.balance}</div>
             <div className="text-gray-400 text-sm">points disponibles</div>
           </div>
 
-          {/* Total Purchased */}
+          {/* Total Earned */}
           <div className="neon-border-pink glass-dark rounded-3xl p-8 transform hover:scale-105 transition duration-300">
-            <div className="text-neon-pink text-xs tracking-widest font-bold mb-4">📊 TOTAL ACHETÉ</div>
-            <div className="text-5xl font-black glow-pink mb-4">{accountData.total_purchased}</div>
+            <div className="text-neon-pink text-xs tracking-widest font-bold mb-4">📊 TOTAL GAGNÉ</div>
+            <div className="text-5xl font-black glow-pink mb-4">{accountData.total_earned}</div>
             <div className="text-gray-400 text-sm">points PTS</div>
           </div>
 
@@ -202,29 +200,11 @@ export default function AccountPage() {
                             <div className="text-gray-400 text-xs tracking-widest mb-2">
                               {formatDate(tx.created_at)}
                             </div>
-                            
-                            {/* Metadata */}
-                            {tx.metadata && (
-                              <div className="space-y-1 text-xs text-gray-500 mt-3 p-3 bg-dark-navy rounded-lg">
-                                {tx.metadata.project_slug && (
-                                  <div>📌 Projet: <span className="text-neon-pink">{tx.metadata.project_slug}</span></div>
-                                )}
-                                {tx.metadata.session_duration_minutes && (
-                                  <div>⏱️ Durée: <span className="text-neon-yellow">{tx.metadata.session_duration_minutes} minutes</span></div>
-                                )}
-                                {tx.metadata.paypal_order_id && (
-                                  <div>🔑 ID PayPal: <span className="font-mono">{tx.metadata.paypal_order_id.slice(0, 20)}...</span></div>
-                                )}
-                                {tx.metadata.ip_address && (
-                                  <div>🌐 IP: <span className="font-mono text-xs">{tx.metadata.ip_address}</span></div>
-                                )}
-                              </div>
-                            )}
                           </div>
 
                           <div className="text-right border-t md:border-t-0 md:border-l border-gray-700 pt-4 md:pt-0 md:pl-6">
                             <div className={`text-3xl font-black ${txInfo.color} mb-2`}>
-                              {txInfo.sign}{tx.points} pts
+                              {txInfo.sign}{tx.amount} pts
                             </div>
                             <div className="text-gray-400 text-sm">
                               Solde: <span className="text-white font-bold">{tx.balance_after} pts</span>

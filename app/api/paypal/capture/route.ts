@@ -113,7 +113,7 @@ export async function GET(req: NextRequest) {
 
     // Rediriger vers page de confirmation
     return NextResponse.redirect(
-      new URL(`/shop/success?points=${points}&balance=${balance.points}`, process.env.NEXTAUTH_URL!)
+      new URL(`/shop/success?points=${points}&balance=${balance?.balance || 0}`, process.env.NEXTAUTH_URL!)
     );
 
   } catch (error: any) {

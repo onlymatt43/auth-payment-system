@@ -27,18 +27,18 @@ export async function GET(req: NextRequest) {
       // Pas encore de solde = nouveau utilisateur
       return NextResponse.json({
         email: emailLower,
-        points: 0,
+        balance: 0,
         total_spent: 0,
-        total_purchased: 0,
+        total_earned: 0,
         has_account: false,
       });
     }
 
     return NextResponse.json({
-      email: balance.email,
-      points: balance.points,
+      email: emailLower,
+      balance: balance.balance,
       total_spent: balance.total_spent,
-      total_purchased: balance.total_purchased,
+      total_earned: balance.total_earned,
       has_account: true,
     });
 

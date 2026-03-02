@@ -26,9 +26,9 @@ export async function GET(req: NextRequest) {
       // Pas encore de solde = nouveau utilisateur
       return NextResponse.json({
         email,
-        points: 0,
+        balance: 0,
         total_spent: 0,
-        total_purchased: 0,
+        total_earned: 0,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         transactions: [],
@@ -39,19 +39,18 @@ export async function GET(req: NextRequest) {
     const transactions = await getTransactionHistory(email, 100);
 
     return NextResponse.json({
-      email: balance.email,
-      points: balance.points,
+      email,
+      balance: balance.balance,
       total_spent: balance.total_spent,
-      total_purchased: balance.total_purchased,
+      total_earned: balance.total_earned,
       created_at: balance.created_at,
       updated_at: balance.updated_at,
       transactions: transactions.map(t => ({
         id: t.id,
         type: t.type,
-        points: t.points,
+        amount: t.amount,
         balance_after: t.balance_after,
         created_at: t.created_at,
-        metadata: t.metadata ? JSON.parse(t.metadata) : null,
       })),
     });
 
