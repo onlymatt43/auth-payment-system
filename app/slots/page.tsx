@@ -250,11 +250,20 @@ export default function SlotsPage() {
       <MotionEffects />
       <div className="max-w-2xl mx-auto">
         {/* Header with Language Switcher */}
-        <div className="flex justify-between items-center mb-12">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-12">
           <h1 className="text-5xl md:text-6xl font-black tracking-tighter">
             <span className="gradient-text">{t('slots.title')}</span>
           </h1>
-          <LanguageSwitcher />
+          <div className="flex items-center gap-3 md:justify-end">
+            <LanguageSwitcher />
+            <button
+              type="button"
+              onClick={() => router.push('/shop')}
+              className="px-4 py-2 rounded-xl border border-neon-yellow text-neon-yellow font-bold tracking-wide hover:bg-neon-yellow hover:text-dark-navy transition"
+            >
+              ← {t('slots.goToShop')}
+            </button>
+          </div>
         </div>
 
         <p className="text-gray-400 text-lg mb-6 text-center">{t('slots.subtitle')}</p>

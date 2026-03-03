@@ -110,6 +110,11 @@
     "connect": "SE CONNECTER AVEC GOOGLE",
     "ready": "PRÊT À COMMENCER?",
     "readyDesc": "Connectez-vous avec Google pour accéder à tous les packages",
-    "value_per_point": "par point"
+    "value_per_point": "par point",
+    "purchaseIntro": "Choisissez un forfait et payez via PayPal",
+    "loginReminder": "Connectez-vous pour débloquer les achats et suivre votre solde",
+    "packagesUnavailable": "Aucun forfait n'est disponible pour l'instant.",
+    "buyWithPayPal": "Acheter avec PayPal",
+    "loginToBuy": "Se connecter pour acheter"
   }
 }

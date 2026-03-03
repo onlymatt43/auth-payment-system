@@ -7,16 +7,20 @@ export function CTAButtons() {
   const router = useRouter();
   const { data: session } = useSession();
 
-  const handleGetPoints = async () => {
+  const handleGetPoints = () => {
     if (!session) {
-      await signIn('google');
+      void signIn('google', { callbackUrl: '/shop' });
+      return;
     }
+
+    router.push('/account');
   };
 
   return (
     <div className="grid md:grid-cols-2 gap-8 w-full max-w-2xl mx-auto">
       {/* GET YOUR ONLYPOINTS Button */}
       <button
+        type="button"
         onClick={handleGetPoints}
         className="neon-border-pink glass-dark rounded-3xl p-12 transform hover:scale-110 transition duration-300 cursor-pointer text-center flex flex-col items-center justify-center min-h-[300px] border-2 border-neon-pink"
       >
@@ -28,6 +32,7 @@ export function CTAButtons() {
 
       {/* PLAY THE SLOT Button */}
       <button
+        type="button"
         onClick={() => router.push('/slots')}
         className="neon-border-blue glass-dark rounded-3xl p-12 transform hover:scale-110 transition duration-300 cursor-pointer text-center flex flex-col items-center justify-center min-h-[300px] border-2 border-neon-blue"
       >

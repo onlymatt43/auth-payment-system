@@ -1,18 +1,24 @@
 'use client';
 
 import { signIn, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export function GetOnlyPointsButton() {
   const { data: session } = useSession();
+  const router = useRouter();
 
-  const handleClick = async () => {
+  const handleClick = () => {
     if (!session) {
-      await signIn('google');
+      void signIn('google', { callbackUrl: '/shop' });
+      return;
     }
+
+    router.push('/account');
   };
 
   return (
     <button
+      type="button"
       onClick={handleClick}
       className="neon-border-pink glass-dark rounded-3xl p-12 transform hover:scale-110 transition duration-300 cursor-pointer text-center flex flex-col items-center justify-center min-h-[300px] border-2 border-neon-pink w-full"
     >

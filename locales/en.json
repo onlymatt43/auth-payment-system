@@ -110,6 +110,11 @@
     "connect": "LOGIN WITH GOOGLE",
     "ready": "READY TO START?",
     "readyDesc": "Login with Google to access all packages",
-    "value_per_point": "per point"
+    "value_per_point": "per point",
+    "purchaseIntro": "Pick a bundle and complete checkout with PayPal",
+    "loginReminder": "Sign in to unlock purchases and track your balance",
+    "packagesUnavailable": "No packages available at the moment.",
+    "buyWithPayPal": "Buy with PayPal",
+    "loginToBuy": "Sign in to buy"
   }
 }
