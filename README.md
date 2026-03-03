@@ -36,6 +36,16 @@ TURSO_AUTH_TOKEN=...
 2) Copier `.env.local` (mode sandbox) avec vos valeurs
 3) `npm run dev` (http://localhost:3001)
 
+## 🧪 Tests E2E (Playwright)
+1) `npx playwright install --with-deps` (une seule fois pour installer les navigateurs)
+2) Lancer `npm run test:e2e` pour exécuter la suite headless (Chrome desktop + mobile)
+3) Utiliser `npm run test:e2e:headed` pour déboguer visuellement ou `npm run test:e2e:ui` pour le mode inspector
+
+Notes :
+- Le `webServer` Playwright démarre automatiquement `npm run dev` et réutilise un serveur déjà ouvert si disponible.
+- Vous pouvez pointer vers un serveur distant via `PLAYWRIGHT_BASE_URL=https://points.onlymatt.ca npm run test:e2e`.
+- Les tests mockent les appels critiques (`/api/auth/email/request-code`, `/api/packages`) pour éviter d'envoyer de vrais emails ou de toucher Turso.
+
 ## 🌐 Déploiement Vercel
 1) Définir les variables ci-dessus dans Vercel (Production)
 2) Choisir `PAYPAL_MODE` selon besoin (sandbox pour tests, live pour réel)

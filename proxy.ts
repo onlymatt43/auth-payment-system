@@ -1,8 +1,10 @@
 import { auth } from './lib/auth';
 
-export default auth((req) => {
+export const proxy = auth((req) => {
   // Protection middleware (automatically handled by NextAuth)
 });
+
+export default proxy;
 
 export const config = {
   matcher: [

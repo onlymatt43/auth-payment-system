@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import { signIn, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { CTAButtons } from '@/components/CTAButtons';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useI18n } from '@/lib/use-i18n';
@@ -31,6 +32,7 @@ interface UserBalance {
 
 export default function ShopPage() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [packages, setPackages] = useState<PointPackage[]>([]);
   const [balance, setBalance] = useState<UserBalance | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,7 +45,7 @@ export default function ShopPage() {
 
   const activePackages = useMemo(() => packages.filter((pkg) => pkg.active), [packages]);
   const handleSignIn = () => {
-    void signIn('google', { callbackUrl: '/shop' });
+    router.push('/login');
   };
   const formatUsd = (value?: number | null) => `$${(value ?? 0).toFixed(2)}`;
 
@@ -69,7 +71,7 @@ export default function ShopPage() {
 
   async function handlePurchase(packageId: number) {
     if (!session?.user?.email) {
-      signIn('google');
+      router.push('/login');
       return;
     }
 
@@ -127,19 +129,24 @@ export default function ShopPage() {
         {/* Auth status */}
         <div className="glass-dark neon-border-blue rounded-3xl p-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm text-gray-400">{t('shop.loginReminder')}</p>
+            <p className="text-sm text-gray-400" data-testid="shop-login-reminder">
+              {t('shop.loginReminder')}
+            </p>
             {session ? (
               <p className="text-2xl font-bold text-white mt-2">
                 {session.user?.email}
               </p>
             ) : (
-              <p className="text-xl font-bold text-neon-yellow mt-2">{t('shop.connect')}</p>
+              <p className="text-xl font-bold text-neon-yellow mt-2" data-testid="shop-login-headline">
+                {t('shop.connect')}
+              </p>
             )}
           </div>
           {!session && (
             <button
               type="button"
               onClick={handleSignIn}
+              data-testid="shop-login-button"
               className="btn-neon w-full md:w-auto"
             >
               {t('shop.connect')}
@@ -199,6 +206,7 @@ export default function ShopPage() {
                     type="button"
                     disabled={!session || purchasing === pkg.id}
                     onClick={() => handlePurchase(pkg.id)}
+                    data-testid={`package-cta-${pkg.id}`}
                     className={`w-full py-3 rounded-2xl font-bold transition-colors ${
                       session
                         ? 'btn-neon'

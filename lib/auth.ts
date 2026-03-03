@@ -1,7 +1,9 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
+import Credentials from "next-auth/providers/credentials";
 import type { NextAuthConfig, Session } from "next-auth";
 import client from "./turso";
+import { verifyEmailLoginCode } from "./email-login";
 
 declare module "next-auth" {
   interface User {
@@ -17,6 +19,39 @@ declare module "next-auth" {
 
 export const authConfig = {
   providers: [
+    Credentials({
+      id: 'email-code',
+      name: 'Email',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        code: { label: 'Code', type: 'text' },
+      },
+      async authorize(credentials) {
+        const rawEmail = typeof credentials?.email === 'string' ? credentials.email : '';
+        const rawCode = typeof credentials?.code === 'string' ? credentials.code : '';
+        const email = rawEmail.toLowerCase().trim();
+        const code = rawCode.trim();
+
+        if (!email || !code) {
+          throw new Error('Email et code requis');
+        }
+
+        const isValid = await verifyEmailLoginCode(email, code);
+
+        if (!isValid) {
+          throw new Error('Code invalide ou expiré');
+        }
+
+        const user = await findOrCreateUser(email);
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name || user.email,
+          role: user.role || 'user',
+        } as any;
+      },
+    }),
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
@@ -49,37 +84,15 @@ export const authConfig = {
     },
     async jwt({ token, user }) {
       if (user?.email) {
-        // Fetch user role from database on first login
         try {
-          const result = await client.execute({
-            sql: 'SELECT id, role FROM users WHERE email = ?',
-            args: [user.email],
+          const dbUser = await findOrCreateUser(user.email, {
+            name: user.name,
+            image: (user as any).image,
           });
-
-          if (result.rows.length > 0) {
-            token.role = result.rows[0].role || 'user';
-            token.userId = result.rows[0].id;
-          } else {
-            // Create user on first login if doesn't exist
-            try {
-              const insertResult = await client.execute({
-                sql: `INSERT INTO users (name, email, image, role) 
-                      VALUES (?, ?, ?, 'user') 
-                      RETURNING id, role`,
-                args: [user.name || '', user.email, user.image || null],
-              });
-              
-              if (insertResult.rows.length > 0) {
-                token.userId = insertResult.rows[0].id;
-                token.role = 'user';
-              }
-            } catch (insertError) {
-              console.error('Error creating user:', insertError instanceof Error ? insertError.message : 'Unknown error');
-              token.role = 'user';
-            }
-          }
+          token.role = dbUser.role || 'user';
+          token.userId = dbUser.id;
         } catch (error) {
-          console.error('Error fetching user role:', error instanceof Error ? error.message : 'Unknown error');
+          console.error('Error ensuring user:', error instanceof Error ? error.message : 'Unknown error');
           token.role = 'user';
         }
       }
@@ -92,3 +105,21 @@ export const authConfig = {
 } satisfies NextAuthConfig;
 
 export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
+
+async function findOrCreateUser(email: string, profile?: { name?: string | null; image?: string | null }) {
+  const existing = await client.execute({
+    sql: 'SELECT id, email, name, image, role FROM users WHERE email = ?',
+    args: [email],
+  });
+
+  if (existing.rows.length > 0) {
+    return existing.rows[0] as unknown as { id: number; email: string; name?: string | null; image?: string | null; role?: string | null };
+  }
+
+  const inserted = await client.execute({
+    sql: `INSERT INTO users (name, email, image, role) VALUES (?, ?, ?, 'user') RETURNING id, email, name, image, role`,
+    args: [profile?.name || '', email, profile?.image || null],
+  });
+
+  return inserted.rows[0] as unknown as { id: number; email: string; name?: string | null; image?: string | null; role?: string | null };
+}
