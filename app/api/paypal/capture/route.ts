@@ -4,6 +4,7 @@ import { capturePayPalOrder } from '@/lib/paypal';
 import { creditPoints } from '@/lib/points';
 import client from '@/lib/turso';
 import { createSafeLog } from '@/lib/log-sanitizer';
+import { normalizeEmail } from '@/lib/email-normalize';
 
 /**
  * GET /api/paypal/capture?token=xxx
@@ -51,10 +52,12 @@ export async function GET(req: NextRequest) {
     }
 
     const { package_id, email, points } = customData;
+    const sessionEmail = normalizeEmail(session.user.email);
+    const payloadEmail = normalizeEmail(email);
 
     // 🔒 SECURITY: Verify email matches
-    if (email !== session.user.email) {
-      console.warn(`PayPal capture warning: Email mismatch - expected ${session.user.email}, got ${email}`);
+    if (payloadEmail !== sessionEmail) {
+      console.warn('PayPal capture warning: Email mismatch - expected ' + sessionEmail + ', got ' + payloadEmail);
       throw new Error('Email verification failed');
     }
 
@@ -104,7 +107,7 @@ export async function GET(req: NextRequest) {
     }
 
     // 🔒 All validations passed, credit the points
-    const balance = await creditPoints(email, points, 'purchase', {
+    const balance = await creditPoints(payloadEmail, points, 'purchase', {
       paypal_order_id: token,
       package_id,
       capture_id: capture.id,

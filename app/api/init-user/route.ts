@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth';
 import client from '@/lib/turso';
+import { normalizeEmail } from '@/lib/email-normalize';
 import { NextResponse } from 'next/server';
 
 /**
@@ -19,8 +20,8 @@ export async function POST() {
 
     // Get user ID from email
     const userResult = await client.execute({
-      sql: 'SELECT id FROM users WHERE email = ?',
-      args: [session.user.email],
+      sql: 'SELECT id FROM users WHERE lower(email) = ?',
+      args: [normalizeEmail(session.user.email)],
     });
 
     if (userResult.rows.length === 0) {
@@ -47,7 +48,7 @@ export async function POST() {
     }
 
     return NextResponse.json(
-      { success: true, userId, email: session.user.email },
+      { success: true, userId, email: normalizeEmail(session.user.email) },
       { status: 200 }
     );
   } catch (error) {

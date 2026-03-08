@@ -4,6 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import type { NextAuthConfig } from "next-auth";
 import client from "./turso";
 import { verifyEmailLoginCode } from "./email-login";
+import { normalizeEmail } from "./email-normalize";
 
 declare module "next-auth" {
   interface User {
@@ -26,10 +27,8 @@ const providers: NextAuthConfig["providers"] = [
       code: { label: "Code", type: "text" },
     },
     async authorize(credentials) {
-      const rawEmail = typeof credentials?.email === "string" ? credentials.email : "";
-      const rawCode = typeof credentials?.code === "string" ? credentials.code : "";
-      const email = rawEmail.toLowerCase().trim();
-      const code = rawCode.trim();
+      const email = normalizeEmail(typeof credentials?.email === "string" ? credentials.email : "");
+      const code = (typeof credentials?.code === "string" ? credentials.code : "").trim();
 
       if (!email || !code) {
         throw new Error("Email et code requis");
@@ -82,15 +81,17 @@ export const authConfig = {
     },
     async session({ session, token }) {
       if (session?.user && token?.email) {
-        session.user.email = token.email;
+        session.user.email = normalizeEmail(token.email);
         session.user.role = token.role as string | undefined;
       }
       return session;
     },
     async jwt({ token, user }) {
       if (user?.email) {
+        const normalizedEmail = normalizeEmail(user.email);
+        token.email = normalizedEmail;
         try {
-          const dbUser = await findOrCreateUser(user.email, {
+          const dbUser = await findOrCreateUser(normalizedEmail, {
             name: user.name,
             image: (user as any).image,
           });
@@ -111,9 +112,11 @@ export const authConfig = {
 
 export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
 
-async function findOrCreateUser(email: string, profile?: { name?: string | null; image?: string | null }) {
+async function findOrCreateUser(rawEmail: string, profile?: { name?: string | null; image?: string | null }) {
+  const email = normalizeEmail(rawEmail);
+
   const existing = await client.execute({
-    sql: "SELECT id, email, name, image, role FROM users WHERE email = ?",
+    sql: "SELECT id, email, name, image, role FROM users WHERE lower(email) = ?",
     args: [email],
   });
 

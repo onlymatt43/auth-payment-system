@@ -65,8 +65,6 @@ export default function LoginPage() {
       setStep('pending');
       if (data?.mailFallback && data?.devCode) {
         setInfo(t('login.devCode', { code: data.devCode }));
-      } else {
-        setInfo(t('login.sent'));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : t('login.unexpected'));
@@ -106,6 +104,16 @@ export default function LoginPage() {
     signIn('google', { callbackUrl: '/shop' });
   };
 
+  const subtleGoogle = googleAvailable ? (
+    <button
+      type="button"
+      onClick={handleGoogle}
+      className="mx-auto block text-sm text-text-muted underline-offset-4 hover:text-text-primary hover:underline"
+    >
+      {t('login.google')}
+    </button>
+  ) : null;
+
   if (!isNewUi) {
     return (
       <main className="app-shell min-h-screen px-6 py-10 md:px-10">
@@ -124,11 +132,6 @@ export default function LoginPage() {
               {t('login.continue')}
             </Button>
           </form>
-          {googleAvailable && (
-            <Button type="button" variant="outline" tone="neutral" className="mt-4 w-full" onClick={handleGoogle}>
-              {t('login.google')}
-            </Button>
-          )}
           {(error || info) && (
             <div className="mt-4">
               <Alert tone={error ? 'danger' : 'accent'}>{error || info}</Alert>
@@ -164,11 +167,6 @@ export default function LoginPage() {
                   {t('login.continue')}
                 </Button>
               </form>
-              {googleAvailable && (
-                <Button type="button" variant="outline" tone="neutral" className="w-full" onClick={handleGoogle}>
-                  {t('login.google')}
-                </Button>
-              )}
             </div>
           )}
 
@@ -183,11 +181,7 @@ export default function LoginPage() {
                 <p className="mt-2 text-text-primary">{t('login.messageBody')}</p>
                 <p className="mt-1 text-sm text-text-secondary">{t('login.messageAction')}</p>
               </button>
-              {googleAvailable && (
-                <Button type="button" variant="outline" tone="neutral" className="w-full" onClick={handleGoogle}>
-                  {t('login.google')}
-                </Button>
-              )}
+              {subtleGoogle}
             </div>
           )}
 
@@ -214,11 +208,7 @@ export default function LoginPage() {
                   {t('login.useOtherEmail')}
                 </button>
               </form>
-              {googleAvailable && (
-                <Button type="button" variant="outline" tone="neutral" className="w-full" onClick={handleGoogle}>
-                  {t('login.google')}
-                </Button>
-              )}
+              {subtleGoogle}
             </div>
           )}
 

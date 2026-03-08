@@ -1,4 +1,5 @@
 import client from './turso';
+import { normalizeEmail } from './email-normalize';
 
 /**
  * Service de gestion des points utilisateurs
@@ -36,9 +37,10 @@ export interface PointConfig {
  * Get user ID from email
  */
 async function getUserIdFromEmail(email: string): Promise<number | null> {
+  const normalizedEmail = normalizeEmail(email);
   const result = await client.execute({
-    sql: 'SELECT id FROM users WHERE email = ?',
-    args: [email],
+    sql: 'SELECT id FROM users WHERE lower(email) = ?',
+    args: [normalizedEmail],
   });
 
   if (result.rows.length === 0) {

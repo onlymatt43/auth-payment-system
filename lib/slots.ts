@@ -3,6 +3,7 @@
 import { auth } from '@/lib/auth';
 import client from '@/lib/turso';
 import { slotsRatelimit } from '@/lib/rate-limit';
+import { normalizeEmail } from '@/lib/email-normalize';
 
 // Simple in-memory fallback rate limiting if Upstash is not configured
 const spinAttempts = new Map<string, number[]>();
@@ -160,8 +161,10 @@ export async function spinSlots(payWithPoints: boolean = false, pointsCost: numb
   }
 
   // 🔒 SECURITY: Check rate limiting (Upstash if configured, otherwise in-memory fallback)
+  const normalizedEmail = normalizeEmail(session.user.email);
+
   if (slotsRatelimit) {
-    const { success } = await slotsRatelimit.limit(session.user.email);
+    const { success } = await slotsRatelimit.limit(normalizedEmail);
     if (!success) {
       return {
         success: false,
@@ -170,7 +173,7 @@ export async function spinSlots(payWithPoints: boolean = false, pointsCost: numb
       };
     }
   } else {
-    const { allowed } = checkAndRecordFallbackRateLimit(session.user.email);
+    const { allowed } = checkAndRecordFallbackRateLimit(normalizedEmail);
     if (!allowed) {
       return {
         success: false,
@@ -183,8 +186,8 @@ export async function spinSlots(payWithPoints: boolean = false, pointsCost: numb
   try {
     // Get user ID from email
     const userResult = await client.execute({
-      sql: `SELECT id FROM users WHERE email = ?`,
-      args: [session.user.email],
+      sql: `SELECT id FROM users WHERE lower(email) = ?`,
+      args: [normalizedEmail],
     });
 
     if (userResult.rows.length === 0) {
@@ -228,7 +231,7 @@ export async function spinSlots(payWithPoints: boolean = false, pointsCost: numb
       `,
       args: [
         userId,
-        session.user.email,
+        normalizedEmail,
         payWithPoints ? pointsCost : 0,
         outcome.points,
         JSON.stringify(outcome.reels),

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { createPayPalOrder } from '@/lib/paypal';
 import client from '@/lib/turso';
+import { normalizeEmail } from '@/lib/email-normalize';
 
 /**
  * POST /api/paypal/create-order
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
     // Créer la commande PayPal
     const customData = JSON.stringify({
       package_id,
-      email: session.user.email,
+      email: normalizeEmail(session.user.email),
       points,
     });
 

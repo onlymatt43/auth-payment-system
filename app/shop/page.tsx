@@ -173,9 +173,6 @@ export default function ShopPage() {
           ) : (
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <p className="font-display text-2xl font-black text-brand" data-testid="shop-login-headline">{t('shop.connect')}</p>
-              <Button type="button" onClick={() => router.push('/login')} data-testid="shop-login-button" size="lg">
-                {t('shop.connect')}
-              </Button>
             </div>
           )}
         </Card>

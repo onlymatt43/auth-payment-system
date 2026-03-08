@@ -74,7 +74,7 @@ export default function SlotsPage() {
     try {
       const res = await fetch('/api/balance');
       const data = await res.json();
-      setBalance(data.points || 0);
+      setBalance(data.balance ?? data.points ?? 0);
     } catch (error) {
       console.error('Failed to fetch balance:', error);
     }
@@ -98,7 +98,7 @@ export default function SlotsPage() {
     if (isSpinning) return;
 
     if (!session?.user?.email) {
-      router.push('/auth/signin');
+      router.push('/login');
       return;
     }
 
