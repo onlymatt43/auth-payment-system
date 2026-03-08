@@ -93,7 +93,8 @@ export default function SlotsPage() {
     }
   }
 
-  async function handleSpin(payWithPoints = false) {
+  async function handleSpin(payWithPoints = false, forcedCost?: number) {
+    const selectedCost = forcedCost ?? pointsCost;
     if (isSpinning) return;
 
     if (!session?.user?.email) {
@@ -102,12 +103,12 @@ export default function SlotsPage() {
     }
 
     // Check if user has enough points for paid spin
-    if (payWithPoints && balance < pointsCost) {
+    if (payWithPoints && balance < selectedCost) {
       addStamp({
         type: 'custom',
         title: t('stamps.slots.insufficientPoints.title'),
         message: t('stamps.slots.insufficientPoints.message', {
-          need: pointsCost,
+          need: selectedCost,
           have: balance,
         }),
         emoji: '❌',
@@ -141,7 +142,7 @@ export default function SlotsPage() {
     }, 100);
 
     // Call server action directly
-    const spinResult = await spinSlots(payWithPoints, payWithPoints ? pointsCost : 0);
+    const spinResult = await spinSlots(payWithPoints, payWithPoints ? selectedCost : 0);
 
     // Stop animation
     clearInterval(spinAnimation);
@@ -329,7 +330,14 @@ export default function SlotsPage() {
                 {[10, 25, 50].map((cost) => (
                   <button
                     key={cost}
-                    onClick={() => setPointsCost(cost)}
+                    onClick={() => {
+                      setPointsCost(cost);
+                      if (balance >= cost) {
+                        void handleSpin(true, cost);
+                      } else {
+                        router.push(`/shop?source=slots&need_points=`);
+                      }
+                    }}
                     className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all duration-300 ${
                       pointsCost === cost
                         ? 'bg-neon-pink text-white hover-glow'
