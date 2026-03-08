@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,9 +29,7 @@ interface ProjectCost {
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
-  const [adminPassword, setAdminPassword] = useState('');
-  const [authenticated, setAuthenticated] = useState(false);
-  
+
   // States
   const [packages, setPackages] = useState<PointPackage[]>([]);
   const [projects, setProjects] = useState<ProjectCost[]>([]);
@@ -44,30 +41,27 @@ export default function AdminPage() {
   const [newConfig, setNewConfig] = useState({ dollar: 0.10, minutes: 6 });
 
   useEffect(() => {
-    if (authenticated) {
+    if (status === 'authenticated' && session?.user?.role === 'admin') {
       loadData();
     }
-  }, [authenticated]);
+  }, [status, session]);
 
   async function loadData() {
     try {
       // Packages
       const pkgRes = await fetch('/api/admin/packages', {
-        headers: { 'x-admin-password': adminPassword },
       });
       const pkgData = await pkgRes.json();
       setPackages(pkgData.packages || []);
 
       // Projects
       const projRes = await fetch('/api/admin/projects', {
-        headers: { 'x-admin-password': adminPassword },
       });
       const projData = await projRes.json();
       setProjects(projData.projects || []);
 
       // Config
       const confRes = await fetch('/api/admin/config', {
-        headers: { 'x-admin-password': adminPassword },
       });
       const confData = await confRes.json();
       setConfig(confData);
@@ -77,29 +71,12 @@ export default function AdminPage() {
     }
   }
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    // Vérifier le mot de passe
-    const res = await fetch('/api/admin/verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: adminPassword }),
-    });
-    
-    if (res.ok) {
-      setAuthenticated(true);
-    } else {
-      alert('Mot de passe incorrect');
-    }
-  }
-
   async function createPackage() {
     try {
       await fetch('/api/admin/packages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-password': adminPassword,
         },
         body: JSON.stringify(newPackage),
       });
@@ -116,7 +93,6 @@ export default function AdminPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-password': adminPassword,
         },
         body: JSON.stringify({
           point_dollar_value: newConfig.dollar,
@@ -141,26 +117,17 @@ export default function AdminPage() {
     );
   }
 
-  if (!authenticated) {
+  if (status === 'authenticated' && session?.user?.role !== 'admin') {
     return (
       <main className="min-h-screen bg-gradient-to-br from-dark-darker via-dark-navy to-dark-blue flex items-center justify-center p-6">
-        <form onSubmit={handleLogin} className="w-full max-w-md">
-          <div className="neon-border-yellow glass-dark rounded-3xl p-12">
-            <h1 className="text-4xl font-black gradient-text mb-2">ADMIN PANEL</h1>
-            <p className="text-gray-400 text-sm tracking-widest mb-8">Système de Points</p>
-            
-            <input
-              type="password"
-              value={adminPassword}
-              onChange={(e) => setAdminPassword(e.target.value)}
-              placeholder="Mot de passe admin"
-              className="w-full bg-dark-navy border border-neon-yellow rounded-lg px-4 py-3 text-white placeholder-gray-500 mb-6 focus:outline-none focus:border-neon-pink transition"
-            />
-            <button type="submit" className="btn-neon w-full">
-              🔑 SE CONNECTER
-            </button>
+        <div className="w-full max-w-md">
+          <div className="neon-border-yellow glass-dark rounded-3xl p-12 text-center">
+            <h1 className="text-4xl font-black gradient-text mb-2">ACCÈS REFUSÉ</h1>
+            <p className="text-gray-400 text-sm tracking-widest mb-6">
+              Cette page est réservée aux administrateurs.
+            </p>
           </div>
-        </form>
+        </div>
       </main>
     );
   }
