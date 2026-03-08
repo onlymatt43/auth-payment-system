@@ -2,39 +2,22 @@
 
 import { auth } from '@/lib/auth';
 import client from '@/lib/turso';
+import { slotsRatelimit } from '@/lib/rate-limit';
 
-// In-memory rate limiting (key: email, value: array of timestamps)
+// Simple in-memory fallback rate limiting if Upstash is not configured
 const spinAttempts = new Map<string, number[]>();
-
-// Rate limit configuration
 const RATE_LIMIT_WINDOW_MS = 3600000; // 1 hour
 const RATE_LIMIT_MAX_SPINS = 5; // 5 spins per hour
 
-// Clean up old entries periodically
-setInterval(() => {
-  const now = Date.now();
-  for (const [email, attempts] of spinAttempts.entries()) {
-    const recent = attempts.filter(t => now - t < RATE_LIMIT_WINDOW_MS);
-    if (recent.length === 0) {
-      spinAttempts.delete(email);
-    } else {
-      spinAttempts.set(email, recent);
-    }
-  }
-}, 300000); // Clean every 5 minutes
-
-function checkAndRecordRateLimit(email: string): { allowed: boolean; remaining: number } {
+function checkAndRecordFallbackRateLimit(email: string): { allowed: boolean; remaining: number } {
   const now = Date.now();
   const attempts = spinAttempts.get(email) || [];
-
-  // Keep only recent attempts (within 1 hour)
-  const recent = attempts.filter(t => now - t < RATE_LIMIT_WINDOW_MS);
+  const recent = attempts.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
 
   if (recent.length >= RATE_LIMIT_MAX_SPINS) {
     return { allowed: false, remaining: 0 };
   }
 
-  // Record this attempt
   recent.push(now);
   spinAttempts.set(email, recent);
 
@@ -176,14 +159,25 @@ export async function spinSlots(payWithPoints: boolean = false, pointsCost: numb
     return { success: false, error: 'Not authenticated' };
   }
 
-  // 🔒 SECURITY: Check rate limiting
-  const { allowed, remaining } = checkAndRecordRateLimit(session.user.email);
-  if (!allowed) {
-    return {
-      success: false,
-      error: 'Too many spins. Maximum 5 spins per hour. Try again later.',
-      rateLimited: true,
-    };
+  // 🔒 SECURITY: Check rate limiting (Upstash if configured, otherwise in-memory fallback)
+  if (slotsRatelimit) {
+    const { success } = await slotsRatelimit.limit(session.user.email);
+    if (!success) {
+      return {
+        success: false,
+        error: 'Too many spins. Maximum 5 spins per hour. Try again later.',
+        rateLimited: true,
+      };
+    }
+  } else {
+    const { allowed } = checkAndRecordFallbackRateLimit(session.user.email);
+    if (!allowed) {
+      return {
+        success: false,
+        error: 'Too many spins. Maximum 5 spins per hour. Try again later.',
+        rateLimited: true,
+      };
+    }
   }
 
   try {
