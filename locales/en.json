@@ -1,0 +1,141 @@
+{
+  "common": {
+    "language": "English",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "close": "Close",
+    "balance": "BALANCE",
+    "pointsLabel": "OnlySLUT POINTS",
+    "pointsAbbr": "pts"
+  },
+  "slots": {
+    "title": "SLOT MACHINE",
+    "subtitle": "Spin and earn points!",
+    "notSignedIn": "Login to play!",
+    "goToShop": "GO TO SHOP",
+    "freeSpinButton": "FREE SPIN (24h)",
+    "paidSpinButton": "SPIN FOR {cost} PTS",
+    "spinning": "SPINNING...",
+    "or": "OR",
+    "payWithPoints": "Pay with points:",
+    "freeSpinAvailable": "You have a free spin available!",
+    "error": "ERROR",
+    "won": "WON!",
+    "lost": "LOST!",
+    "multiplier": "Multiplier",
+    "newBalance": "New balance",
+    "howItWorks": "HOW IT WORKS?",
+    "rule1": "1 free spin every 24h",
+    "rule2": "Use your points for more spins",
+    "rule3": "Win between 0 and 250 points",
+    "rule4": "Hit the JACKPOT and win BIG!"
+  },
+  "stamps": {
+    "slots": {
+      "welcome": {
+        "title": "Welcome! 🎰",
+        "message": "This is your first visit. Learn how to play and earn points!"
+      },
+      "insufficientPoints": {
+        "title": "Insufficient balance ❌",
+        "message": "You need {need} points, you have {have}"
+      },
+      "freeSpinCooldown": {
+        "title": "Free spin on cooldown ⏰",
+        "message": "Your next free spin will be available in {minutes} minute(s)"
+      },
+      "jackpot": {
+        "title": "🏆 JACKPOT! 🏆",
+        "message": "INCREDIBLE! You won {points} points!"
+      },
+      "bigWin": {
+        "title": "Big win! 💎",
+        "message": "Amazing result! You won {points} points!"
+      },
+      "noWin": {
+        "title": "No luck this time 😅",
+        "message": "No winnings for this spin, but you can try again tomorrow!"
+      },
+      "rateLimit": {
+        "title": "Slow down! 🛑",
+        "message": "Maximum 5 spins per hour. Come back in 1 hour to continue."
+      },
+      "error": {
+        "title": "Error ⚠️",
+        "message": "An error occurred. Try again."
+      }
+    },
+    "welcome": {
+      "title": "Welcome! 🎉",
+      "message": "This is your first spin! Check your email for details.",
+      "action": "Check email"
+    },
+    "freeSpinAvailable": {
+      "title": "Free spin available! ⭐",
+      "message": "You're eligible for your daily free spin.",
+      "action": "Play"
+    },
+    "freeSpinUsed": {
+      "title": "Free spin used ✓",
+      "message": "Come back tomorrow for your next free spin.",
+      "action": "Buy points"
+    },
+    "jackpot": {
+      "title": "🏆 JACKPOT! 🏆",
+      "message": "You hit the jackpot! {points} points!",
+      "action": "Awesome!"
+    },
+    "bigWin": {
+      "title": "Big win! 💎",
+      "message": "You won {points} points!",
+      "action": "Cool!"
+    },
+    "aboutToPayForSpin": {
+      "title": "Need points 💸",
+      "message": "Buy points to continue playing.",
+      "action": "Shop"
+    },
+    "rateLimit": {
+      "title": "Slow down! ⏱️",
+      "message": "Max 5 spins per hour. Try again later.",
+      "action": "Got it"
+    }
+  },
+  "shop": {
+    "title": "POINTS",
+    "balance": "YOUR BALANCE",
+    "totalBought": "TOTAL BOUGHT",
+    "packages": "PACKAGES",
+    "howItWorks": "HOW IT WORKS?",
+    "connect": "LOGIN WITH GOOGLE",
+    "ready": "READY TO START?",
+    "readyDesc": "Login with Google to access all packages",
+    "value_per_point": "per point",
+    "purchaseIntro": "Pick a bundle and complete checkout with PayPal",
+    "loginReminder": "Sign in to unlock purchases and track your balance",
+    "packagesUnavailable": "No packages available at the moment.",
+    "buyWithPayPal": "Buy now",
+    "loginToBuy": "Sign in to buy"
+  },
+  "login": {
+    "badge": "Login",
+    "title": "Quick Access",
+    "step1": "Step 1",
+    "step2": "Step 2",
+    "enterEmail": "Enter your email here",
+    "enterCode": "Enter your code here",
+    "continue": "Continue",
+    "signIn": "Sign in",
+    "messageLabel": "Message",
+    "messageBody": "You will receive a code by email.",
+    "messageAction": "Click here to enter your code.",
+    "useOtherEmail": "Use another email",
+    "google": "Connect with Google",
+    "sent": "Code sent. Click below to enter your code.",
+    "devCode": "Dev mode: use code {code} then click to continue.",
+    "invalidCode": "Invalid code",
+    "unexpected": "Unexpected error",
+    "cannotGenerate": "Unable to generate code"
+  }
+}

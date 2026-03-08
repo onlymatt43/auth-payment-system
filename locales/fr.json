@@ -1,0 +1,141 @@
+{
+  "common": {
+    "language": "Français",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "close": "Fermer",
+    "balance": "SOLDE",
+    "pointsLabel": "OnlySLUT POINTS",
+    "pointsAbbr": "pts"
+  },
+  "slots": {
+    "title": "MACHINES À SOUS",
+    "subtitle": "Spin et gagne des points!",
+    "notSignedIn": "Connecte-toi pour jouer!",
+    "goToShop": "ALLER À LA BOUTIQUE",
+    "freeSpinButton": "SPIN GRATUIT (24h)",
+    "paidSpinButton": "SPIN POUR {cost} PTS",
+    "spinning": "SPINNING...",
+    "or": "OU",
+    "payWithPoints": "Payer avec des points:",
+    "freeSpinAvailable": "Tu as un spin gratuit disponible!",
+    "error": "ERREUR",
+    "won": "GAGNÉ!",
+    "lost": "PERDU!",
+    "multiplier": "Multiplicateur",
+    "newBalance": "Nouveau solde",
+    "howItWorks": "COMMENT ÇA MARCHE?",
+    "rule1": "1 spin gratuit par 24h",
+    "rule2": "Utilise tes points pour plus de spins",
+    "rule3": "Gagne entre 0 et 250 points",
+    "rule4": "Déclenche le JACKPOT et gagne BIG!"
+  },
+  "stamps": {
+    "slots": {
+      "welcome": {
+        "title": "Bienvenue! 🎰",
+        "message": "C'est ta première visite. Découvre comment jouer et gagne des points!"
+      },
+      "insufficientPoints": {
+        "title": "Solde insuffisant ❌",
+        "message": "Tu as besoin de {need} points, tu en as {have}"
+      },
+      "freeSpinCooldown": {
+        "title": "Spin gratuit en attente ⏰",
+        "message": "Ton prochain spin gratuit sera disponible dans {minutes} minute(s)"
+      },
+      "jackpot": {
+        "title": "🏆 JACKPOT! 🏆",
+        "message": "INCROYABLE! Tu as remporté {points} points!"
+      },
+      "bigWin": {
+        "title": "Grosse victoire! 💎",
+        "message": "Résultat spectaculaire! Tu as gagné {points} points!"
+      },
+      "noWin": {
+        "title": "Rien cette fois 😅",
+        "message": "Aucun gain pour ce spin, mais tu peux réessayer demain!"
+      },
+      "rateLimit": {
+        "title": "Ralentis un peu! 🛑",
+        "message": "Maximum 5 spins par heure. Reviens dans 1 heure pour continuer."
+      },
+      "error": {
+        "title": "Erreur ⚠️",
+        "message": "Une erreur s'est produite. Réessaie."
+      }
+    },
+    "welcome": {
+      "title": "Bienvenue! 🎉",
+      "message": "C'est ton premier spin! Consulte ton email pour les détails.",
+      "action": "Voir email"
+    },
+    "freeSpinAvailable": {
+      "title": "Spin gratuit disponible! ⭐",
+      "message": "Tu as droit à ton spin gratuit quotidien.",
+      "action": "Jouer"
+    },
+    "freeSpinUsed": {
+      "title": "Spin gratuit utilisé ✓",
+      "message": "Reviens demain pour ton prochain spin gratuit.",
+      "action": "Acheter points"
+    },
+    "jackpot": {
+      "title": "🏆 JACKPOT! 🏆",
+      "message": "Tu as remporté le jackpot! {points} points!",
+      "action": "Yesss!"
+    },
+    "bigWin": {
+      "title": "Grosse victoire! 💎",
+      "message": "Tu as gagné {points} points!",
+      "action": "Cool!"
+    },
+    "aboutToPayForSpin": {
+      "title": "Points requis 💸",
+      "message": "Achète des points pour continuer à jouer.",
+      "action": "Boutique"
+    },
+    "rateLimit": {
+      "title": "Ralentis un peu! ⏱️",
+      "message": "Max 5 spins par heure. Reviens plus tard.",
+      "action": "D'accord"
+    }
+  },
+  "shop": {
+    "title": "POINTS",
+    "balance": "VOTRE SOLDE",
+    "totalBought": "TOTAL ACHETÉ",
+    "packages": "PACKAGES",
+    "howItWorks": "COMMENT ÇA MARCHE?",
+    "connect": "SE CONNECTER AVEC GOOGLE",
+    "ready": "PRÊT À COMMENCER?",
+    "readyDesc": "Connectez-vous avec Google pour accéder à tous les packages",
+    "value_per_point": "par point",
+    "purchaseIntro": "Choisissez un forfait et payez via PayPal",
+    "loginReminder": "Connectez-vous pour débloquer les achats et suivre votre solde",
+    "packagesUnavailable": "Aucun forfait n'est disponible pour l'instant.",
+    "buyWithPayPal": "Acheter",
+    "loginToBuy": "Se connecter pour acheter"
+  },
+  "login": {
+    "badge": "Connexion",
+    "title": "Accès rapide",
+    "step1": "Étape 1",
+    "step2": "Étape 2",
+    "enterEmail": "Entre ton email ici",
+    "enterCode": "Entre ton code ici",
+    "continue": "Continuer",
+    "signIn": "Se connecter",
+    "messageLabel": "Message",
+    "messageBody": "Tu vas recevoir un code par email.",
+    "messageAction": "Clique ici pour entrer ton code.",
+    "useOtherEmail": "Utiliser un autre email",
+    "google": "Connecte avec Google",
+    "sent": "Code envoyé. Clique ci-dessous pour entrer ton code.",
+    "devCode": "Mode dev: utilise le code {code} puis clique pour continuer.",
+    "invalidCode": "Code invalide",
+    "unexpected": "Erreur inattendue",
+    "cannotGenerate": "Impossible de générer le code"
+  }
+}

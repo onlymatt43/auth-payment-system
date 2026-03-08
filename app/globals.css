@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-app: #090b15;
+  --bg-surface: #131a2b;
+  --bg-elevated: #1a2338;
+  --text-primary: #f5f7ff;
+  --text-secondary: #d1d8f0;
+  --text-muted: #93a0c7;
+  --brand: #ffcf30;
+  --brand-strong: #ffb700;
+  --accent: #13d7ff;
+  --accent-strong: #01bde4;
+  --status-success: #00d58f;
+  --status-warning: #ff8a3d;
+  --status-error: #ff4d87;
+  --status-error-strong: #ef2d6e;
+  --status-info: #13d7ff;
+  --border-default: #2a3558;
+  --border-strong: #3f4f7d;
+  --ink: #17151f;
+  --shadow-soft: 0 16px 40px rgba(7, 10, 25, 0.35);
+  --shadow-glow: 0 0 0 1px rgba(255, 207, 48, 0.25), 0 16px 40px rgba(255, 207, 48, 0.2);
+  --shadow-intense: 0 0 0 1px rgba(19, 215, 255, 0.35), 0 24px 60px rgba(19, 215, 255, 0.28);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text-primary);
+  font-family: var(--font-body), sans-serif;
+  background:
+    radial-gradient(circle at 85% 8%, rgba(255, 207, 48, 0.14), transparent 36%),
+    radial-gradient(circle at 15% 20%, rgba(19, 215, 255, 0.16), transparent 34%),
+    linear-gradient(180deg, #080b15 0%, #0d1221 52%, #111b30 100%);
+}
+
+.app-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.app-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 36px 36px;
+  opacity: 0.6;
+}
+
+.hover-lift {
+  transition: transform 240ms cubic-bezier(0.2, 0.65, 0.2, 1), box-shadow 240ms cubic-bezier(0.2, 0.65, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow);
+}
+
+.gradient-text {
+  background: linear-gradient(100deg, var(--brand), #ffd66d 33%, var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.animation-delay-120 {
+  animation-delay: 120ms;
+}
+
+@media (max-width: 768px) {
+  .app-shell::before {
+    opacity: 0.25;
+  }
+}
