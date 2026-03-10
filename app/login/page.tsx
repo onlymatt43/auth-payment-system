@@ -79,7 +79,7 @@ export default function LoginPage() {
     }
   }, [session?.user, t]);
 
-  const allowGoogleOption = googleAvailable && hasEmailHistory;
+  const allowGoogleOption = googleAvailable;
 
   const rememberEmailFlow = () => {
     try {
@@ -243,7 +243,7 @@ export default function LoginPage() {
 
               <div className="space-y-2 text-sm text-amber-100/90">
                 {step === 'request' && (
-                  <p>{hasEmailHistory ? t('login.returningHint') : t('login.firstTimeHint')}</p>
+                  <p>{allowGoogleOption ? t('login.returningHint') : t('login.firstTimeHint')}</p>
                 )}
                 {step === 'verify' && (
                   <>
