@@ -25,11 +25,11 @@ export function CTAButtons() {
         <div className="pointer-events-none absolute inset-0 bg-black/45" aria-hidden="true" />
 
         <div className="relative z-10 flex h-full min-h-[280px] flex-col items-center justify-center px-6 py-10 text-center">
-          <Badge tone="accent">Bonus</Badge>
-          <h3 className="mt-4 font-display text-3xl font-black uppercase tracking-tight text-text-primary">Play Slot Mode</h3>
-          <p className="mt-3 max-w-xl text-text-secondary">Try the slot and win additional free points every day.</p>
+          <Badge tone="accent">Slots</Badge>
+          <h3 className="mt-4 font-display text-3xl font-black uppercase tracking-tight text-text-primary">OnlyPoints Machine</h3>
+          <p className="mt-3 max-w-xl text-text-secondary">Spin, win points, and use your balance to keep playing.</p>
           <Button data-testid="cta-get-onlypoints" onClick={() => router.push('/slots')} tone="accent" size="lg" className="mt-8 min-w-[220px]">
-            Launch Slots
+            Open Slots
           </Button>
         </div>
       </Card>

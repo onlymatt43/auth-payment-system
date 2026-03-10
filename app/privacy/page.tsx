@@ -27,7 +27,7 @@ export default function PrivacyPolicy() {
               ONLYMATT respecte votre vie privée. Cette politique explique comment nous collectons, utilisons et protégeons vos données.
             </p>
             <p className="text-gray-300 mb-4">
-              Le système ONLYMATT a été créé pour offrir un acces au contenu à moindre coût, avec moins de gros intermédiaires, et un accès plus direct entre les modèles et les utilisateurs.
+              Le système ONLYMATT a été créé pour offrir un accès au contenu à moindre coût, avec moins de gros intermédiaires, et un accès plus direct entre les modèles et les utilisateurs.
             </p>
             <p className="text-gray-300">
               En utilisant notre plateforme, vous consentez à la collecte et à l'utilisation de vos informations selon cette politique.
@@ -98,7 +98,7 @@ export default function PrivacyPolicy() {
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-neon-blue font-bold">✓</span>
-                <span>Prévenir la fraude et l'abuse du système</span>
+                <span>Prévenir la fraude et l'abus du système</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-neon-blue font-bold">✓</span>
@@ -133,7 +133,7 @@ export default function PrivacyPolicy() {
                 </p>
                 <p className="flex items-start gap-2">
                   <span className="text-neon-yellow font-bold">🔒</span>
-                  <span><strong>Redaction des Logs:</strong> Les données sensibles sont automatiquement redactées</span>
+                  <span><strong>Masquage des Logs:</strong> Les données sensibles sont automatiquement masquées</span>
                 </p>
                 <p className="flex items-start gap-2">
                   <span className="text-neon-yellow font-bold">🔒</span>
@@ -242,7 +242,7 @@ export default function PrivacyPolicy() {
                 Nous conservons vos données:
               </p>
               <ul className="space-y-2 text-sm">
-                <li>• <strong>Compte Actif:</strong> Pendant que vous utilises la plateforme</li>
+                <li>• <strong>Compte Actif:</strong> Pendant que vous utilisez la plateforme</li>
                 <li>• <strong>Transactions:</strong> 7 ans (obligations légales)</li>
                 <li>• <strong>Logs:</strong> 90 jours (sécurité)</li>
                 <li>• <strong>Données Personnelles:</strong> Jusqu'à la suppression du compte</li>

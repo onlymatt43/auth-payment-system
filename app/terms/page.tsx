@@ -28,7 +28,7 @@ export default function TermsOfService() {
               Si vous n'êtes pas d'accord, veuillez cesser d'utiliser notre plateforme.
             </p>
             <p className="text-gray-300 mb-4">
-              ONLYMATT a créé ce système pour offrir un acces au contenu à moindre coût, en reduisant les gros intermédiaires et en facilitant un accès direct entre les modèles et les utilisateurs.
+              ONLYMATT a créé ce système pour offrir un accès au contenu à moindre coût, en réduisant les gros intermédiaires et en facilitant un accès direct entre les modèles et les utilisateurs.
             </p>
             <p className="text-gray-300">
               ONLYMATT est fourni "tel quel" sans garanties de quelque nature que ce soit, explicites ou implicites.
@@ -67,7 +67,7 @@ export default function TermsOfService() {
             <h2 className="text-2xl font-black text-neon-blue mb-4">3. Utilisation des Points</h2>
             <div className="space-y-4 text-gray-300">
               <p>
-                <strong>Points Gratuits:</strong> Les points obtenus via le free spin quotidien ne peuvent pas être convertis 
+                <strong>Points Gratuits:</strong> Les points obtenus via le spin gratuit (une fois toutes les 24 h) ne peuvent pas être convertis 
                 en argent. Ils sont destinés uniquement à être utilisés sur la plateforme.
               </p>
               <p>
@@ -96,7 +96,8 @@ export default function TermsOfService() {
                 <p className="font-bold mb-2">Limites de Sécurité:</p>
                 <ul className="space-y-2 text-sm">
                   <li>• Maximum 5 spins payants par heure</li>
-                  <li>• 1 free spin par 24 heures</li>
+                  <li>• 1 spin gratuit par 24 heures</li>
+                  <li>• Coût d'un spin payant: 10 points</li>
                   <li>• Taux de retour (RTP) fixé à 50%</li>
                 </ul>
               </div>
@@ -112,7 +113,7 @@ export default function TermsOfService() {
             <h2 className="text-2xl font-black text-neon-pink mb-4">5. Paiements et Remboursements</h2>
             <div className="space-y-4 text-gray-300">
               <p>
-                <strong>Méthode de Paiement:</strong> ONLYMATT accepte les paiements via PayPal (sandbox en environnement de test, live en production).
+                <strong>Méthode de Paiement:</strong> ONLYMATT accepte les paiements via PayPal (mode test (sandbox) et mode production (live)).
               </p>
               <p>
                 <strong>Frais:</strong> Aucun frais supplémentaire n'est facturé en plus des prix affichés. Les frais PayPal 

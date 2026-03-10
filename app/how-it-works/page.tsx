@@ -14,7 +14,7 @@ export default function HowItWorks() {
           <h1 className="text-5xl md:text-6xl font-black mb-4 tracking-tighter">
             <span className="gradient-text">COMMENT ÇA MARCHE?</span>
           </h1>
-          <p className="text-gray-400 text-lg">Comprendre le système de points OnlySLUT</p>
+          <p className="text-gray-400 text-lg">Comprendre le système de points ONLYPOINTS MACHINE</p>
           <div className="h-1 bg-gradient-to-r from-neon-yellow via-neon-pink to-neon-blue mt-6 mb-12"></div>
         </div>
 
@@ -24,8 +24,8 @@ export default function HowItWorks() {
           
           <div className="space-y-6 text-gray-300">
             <p>
-              OnlySLUT utilise un système de points transparent et équitable. Les points représentent une valeur virtuelle 
-              que vous pouvez obtenir en jouant aux machines à sous et utiliser pour accéder à du contenu premium.
+              ONLYMATT'slut utilise un système de points transparent et équitable. Les points représentent une valeur virtuelle 
+              que vous pouvez obtenir en jouant aux machines à sous et les utiliser pour accéder à du contenu premium.
             </p>
 
             <div className="bg-dark-navy rounded-lg p-6 border border-neon-yellow/30">
@@ -34,7 +34,7 @@ export default function HowItWorks() {
                 <li className="flex items-start gap-3">
                   <span className="text-neon-yellow font-bold mt-1">→</span>
                   <div>
-                    <strong>Free Spin Quotidien</strong><br/>
+                    <strong>Spin Gratuit Quotidien</strong><br/>
                     <span className="text-sm text-gray-400">Un spin gratuit par jour (24 heures). Vous avez 1/40 de chance de ne rien gagner, mais jusqu'à 250 points si vous déclenchez le JACKPOT.</span>
                   </div>
                 </li>
@@ -42,7 +42,7 @@ export default function HowItWorks() {
                   <span className="text-neon-yellow font-bold mt-1">→</span>
                   <div>
                     <strong>Spins Payants</strong><br/>
-                    <span className="text-sm text-gray-400">Utilisez vos points existants pour faire plus de spins. Coûts: 10, 25 ou 50 points par spin. Maximum 5 spins par heure.</span>
+                    <span className="text-sm text-gray-400">Utilisez vos points existants pour faire plus de spins. Coût: 10 points par spin. Maximum 5 spins payants par heure.</span>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
@@ -79,43 +79,43 @@ export default function HowItWorks() {
                 <tbody>
                   <tr className="border-b border-gray-700">
                     <td className="py-3">Rien</td>
-                    <td className="text-center">🎯 💎 🎪</td>
+                    <td className="text-center">4 3 4</td>
                     <td className="text-right">0</td>
                     <td className="text-right text-red-400">40%</td>
                   </tr>
                   <tr className="border-b border-gray-700">
                     <td className="py-3">Petit Gain</td>
-                    <td className="text-center">🍒 🍒 🎪</td>
+                    <td className="text-center">3 3 4</td>
                     <td className="text-right">5</td>
                     <td className="text-right text-gray-400">25%</td>
                   </tr>
                   <tr className="border-b border-gray-700">
                     <td className="py-3">Gain Moyen</td>
-                    <td className="text-center">🍒 🍒 🍒</td>
+                    <td className="text-center">3 3 3</td>
                     <td className="text-right">10</td>
                     <td className="text-right text-yellow-400">15%</td>
                   </tr>
                   <tr className="border-b border-gray-700">
                     <td className="py-3">Bon Gain</td>
-                    <td className="text-center">💎 💎 🎪</td>
+                    <td className="text-center">4 4 3</td>
                     <td className="text-right">25</td>
                     <td className="text-right text-yellow-400">10%</td>
                   </tr>
                   <tr className="border-b border-gray-700">
                     <td className="py-3">Très Bon Gain</td>
-                    <td className="text-center">💎 💎 💎</td>
+                    <td className="text-center">4 4 4</td>
                     <td className="text-right">50</td>
                     <td className="text-right text-neon-blue">6%</td>
                   </tr>
                   <tr className="border-b border-gray-700">
                     <td className="py-3">Gros Gain</td>
-                    <td className="text-center">👑 👑 🎪</td>
+                    <td className="text-center">🍁 🍁 4</td>
                     <td className="text-right">100</td>
                     <td className="text-right text-neon-blue">3%</td>
                   </tr>
                   <tr>
                     <td className="py-3 font-bold text-neon-yellow">🏆 JACKPOT 🏆</td>
-                    <td className="text-center font-bold">👑 👑 👑</td>
+                    <td className="text-center font-bold">🍁 🍁 🍁</td>
                     <td className="text-right font-bold">250</td>
                     <td className="text-right text-neon-yellow">1%</td>
                   </tr>
@@ -140,12 +140,12 @@ export default function HowItWorks() {
             <div className="bg-dark-navy rounded-lg p-6">
               <h3 className="text-lg font-bold text-neon-blue mb-3">Rate Limiting</h3>
               <p className="mb-3">
-                Pour empêcher l'abuse de la plateforme et les spins automatisés, il existe une limite de <strong>5 spins payants par heure</strong>.
+                Pour empêcher les abus de la plateforme et les spins automatisés, il existe une limite de <strong>5 spins payants par heure</strong>.
               </p>
               <ul className="text-sm space-y-2 text-gray-400">
-                <li>✓ Free spin quotidien: illimité (1 par 24h)</li>
+                <li>✓ Spin gratuit quotidien: 1 par 24 h</li>
                 <li>✓ Spins payants: 5 par heure maximum</li>
-                <li>✓ Erreur clear si vous dépassez</li>
+                <li>✓ Message clair si vous dépassez la limite</li>
               </ul>
             </div>
 
@@ -159,7 +159,7 @@ export default function HowItWorks() {
             <div className="bg-dark-navy rounded-lg p-6">
               <h3 className="text-lg font-bold text-neon-blue mb-3">Logs Sécurisés</h3>
               <p className="text-sm">
-                Toutes les données sensibles (emails, tokens, montants) sont automatiquement redactées dans les logs pour votre protection.
+                Toutes les données sensibles (emails, tokens, montants) sont automatiquement masquées dans les logs pour votre protection.
               </p>
             </div>
           </div>
@@ -173,15 +173,15 @@ export default function HowItWorks() {
             <details className="group border border-gray-600 rounded-lg p-4 cursor-pointer hover:border-neon-yellow/50 transition">
               <summary className="font-bold text-neon-yellow">Est-ce que le RNG est vraiment aléatoire?</summary>
               <p className="text-gray-300 mt-3 text-sm">
-                Oui. Notre générateur de nombres aléatoires utilise la méthode cryptographique standards de Node.js. 
+                Oui. Notre générateur de nombres aléatoires utilise des méthodes cryptographiques standard de Node.js. 
                 Chaque spin est complètement indépendant des précédents.
               </p>
             </details>
 
             <details className="group border border-gray-600 rounded-lg p-4 cursor-pointer hover:border-neon-yellow/50 transition">
-              <summary className="font-bold text-neon-yellow">Peux-je perdre mes points?</summary>
+              <summary className="font-bold text-neon-yellow">Puis-je perdre mes points?</summary>
               <p className="text-gray-300 mt-3 text-sm">
-                Les points gratuits (du free spin) ne disparaissent jamais. Seuls les points que vous dépensez en spins payants 
+                Les points gratuits (du spin gratuit) ne disparaissent jamais. Seuls les points que vous dépensez en spins payants 
                 sont utilisés. Les gains restent vôtres.
               </p>
             </details>
@@ -198,7 +198,7 @@ export default function HowItWorks() {
               <summary className="font-bold text-neon-yellow">Y a-t-il des frais cachés?</summary>
               <p className="text-gray-300 mt-3 text-sm">
                 Non. Les prix affichés sont exactement ce que vous payez. Les frais de transaction PayPal sont pris en charge 
-                par OnlySLUT, pas par vous.
+                par ONLYMATT'slut, pas par vous.
               </p>
             </details>
 
@@ -233,14 +233,14 @@ export default function HowItWorks() {
                 <span className="text-neon-pink font-bold">✓</span>
                 <div>
                   <strong>Probabilités Affichées</strong><br/>
-                  <span className="text-sm text-gray-400">Tous les odds sont publics et vérifiables.</span>
+                  <span className="text-sm text-gray-400">Toutes les probabilités sont publiques et vérifiables.</span>
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-neon-pink font-bold">✓</span>
                 <div>
                   <strong>Aucune Manipulation</strong><br/>
-                  <span className="text-sm text-gray-400">Le code du RNG est auditable et utilise des standards industrie.</span>
+                  <span className="text-sm text-gray-400">Le code du RNG est auditable et utilise des standards de l'industrie.</span>
                 </div>
               </li>
               <li className="flex items-start gap-3">
@@ -264,7 +264,7 @@ export default function HowItWorks() {
         {/* CTA */}
         <section className="text-center">
           <div className="neon-border-blue glass-dark rounded-3xl p-12">
-            <h2 className="text-2xl font-black text-neon-blue mb-4">Prêt à Jouer?</h2>
+            <h2 className="text-2xl font-black text-neon-blue mb-4">Prêt à jouer ?</h2>
             <p className="text-gray-300 mb-6">
               Comprendre les règles est le premier pas. Maintenant, essayez votre chance!
             </p>

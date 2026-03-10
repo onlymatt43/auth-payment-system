@@ -57,6 +57,27 @@ export default function SlotsPage() {
     });
   }, [session?.user?.email, addStamp, t]);
 
+  useEffect(() => {
+    if (!showResult) return;
+
+    const handleUserAction = (event: Event) => {
+      const target = event.target as HTMLElement | null;
+      if (target?.closest('[data-spin-result-card="true"]')) return;
+      setShowResult(false);
+    };
+
+    const events: Array<keyof WindowEventMap> = ['pointerdown', 'keydown', 'wheel', 'touchstart'];
+    for (const eventName of events) {
+      window.addEventListener(eventName, handleUserAction, { passive: true });
+    }
+
+    return () => {
+      for (const eventName of events) {
+        window.removeEventListener(eventName, handleUserAction as EventListener);
+      }
+    };
+  }, [showResult]);
+
   async function fetchBalance() {
     try {
       const res = await fetch('/api/balance');
@@ -382,7 +403,7 @@ export default function SlotsPage() {
 
       {showResult && result && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl border border-amber-200/70 bg-gradient-to-b from-[#2a1712] to-[#120905] p-8 text-center shadow-[0_0_70px_rgba(251,191,36,0.3)]">
+          <div data-spin-result-card="true" className="w-full max-w-md rounded-3xl border border-amber-200/70 bg-gradient-to-b from-[#2a1712] to-[#120905] p-8 text-center shadow-[0_0_70px_rgba(251,191,36,0.3)]">
             {result.success ? (
               <>
                 <div className="mb-4 text-6xl">{result.isJackpot ? '🏆' : result.result === 0 ? '🎲' : '✨'}</div>
@@ -398,13 +419,7 @@ export default function SlotsPage() {
                 <p className="text-zinc-300">{result.error}</p>
               </>
             )}
-
-            <button
-              onClick={() => setShowResult(false)}
-              className="mt-8 w-full rounded-xl border border-amber-300/80 bg-amber-300/20 px-5 py-3 font-bold uppercase tracking-wide text-amber-100 hover:bg-amber-300/30"
-            >
-              {t('common.close')}
-            </button>
+            <p className="mt-8 text-xs uppercase tracking-[0.14em] text-amber-100/80">Interagis n'importe où pour continuer</p>
           </div>
         </div>
       )}

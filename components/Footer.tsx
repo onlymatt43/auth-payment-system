@@ -11,7 +11,6 @@ export function Footer() {
     <footer className="border-t border-border-default bg-surface/80 backdrop-blur">
       <div className="mx-auto w-full max-w-6xl px-6 py-10 md:px-10">
         <section className="text-center">
-          <h4 className="text-sm font-bold uppercase tracking-[0.2em] text-text-muted">Navigation</h4>
           <ul className="mt-2 flex flex-wrap items-center justify-center gap-1 text-sm text-text-secondary">
             <li><Link href="/shop" className={touchLink}>Shop</Link></li>
             <li><Link href="/slots" className={touchLink}>Slots</Link></li>
@@ -21,7 +20,6 @@ export function Footer() {
         </section>
 
         <section className="mt-5 text-center">
-          <h4 className="text-sm font-bold uppercase tracking-[0.2em] text-text-muted">Legal</h4>
           <ul className="mt-2 flex flex-wrap items-center justify-center gap-1 text-sm text-text-secondary">
             <li><Link href="/terms" className={touchLink}>Terms</Link></li>
             <li><Link href="/privacy" className={touchLink}>Privacy</Link></li>
