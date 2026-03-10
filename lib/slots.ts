@@ -167,9 +167,11 @@ export async function spinSlots(payWithPoints: boolean = false, pointsCost: numb
     return { success: false, error: 'Not authenticated' };
   }
 
+  const canonicalEmail = session.user.email.trim().toLowerCase();
+
   // 🔒 SECURITY: Check rate limiting (Upstash if configured, otherwise in-memory fallback)
   if (slotsRatelimit) {
-    const { success } = await slotsRatelimit.limit(session.user.email);
+    const { success } = await slotsRatelimit.limit(canonicalEmail);
     if (!success) {
       return {
         success: false,
@@ -178,7 +180,7 @@ export async function spinSlots(payWithPoints: boolean = false, pointsCost: numb
       };
     }
   } else {
-    const { allowed } = checkAndRecordFallbackRateLimit(session.user.email);
+    const { allowed } = checkAndRecordFallbackRateLimit(canonicalEmail);
     if (!allowed) {
       return {
         success: false,
@@ -191,8 +193,8 @@ export async function spinSlots(payWithPoints: boolean = false, pointsCost: numb
   try {
     // Get user ID from email
     const userResult = await client.execute({
-      sql: `SELECT id FROM users WHERE email = ?`,
-      args: [session.user.email],
+      sql: `SELECT id FROM users WHERE lower(email) = ? LIMIT 1`,
+      args: [canonicalEmail],
     });
 
     if (userResult.rows.length === 0) {
@@ -237,7 +239,7 @@ export async function spinSlots(payWithPoints: boolean = false, pointsCost: numb
         `,
         args: [
           userId,
-          session.user.email,
+          canonicalEmail,
           payWithPoints ? pointsCost : 0,
           outcome.points,
           JSON.stringify(outcome.reels),

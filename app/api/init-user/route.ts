@@ -19,8 +19,8 @@ export async function POST() {
 
     // Get user ID from email
     const userResult = await client.execute({
-      sql: 'SELECT id FROM users WHERE email = ?',
-      args: [session.user.email],
+      sql: 'SELECT id FROM users WHERE lower(email) = ? LIMIT 1',
+      args: [session.user.email.trim().toLowerCase()],
     });
 
     if (userResult.rows.length === 0) {
@@ -47,7 +47,7 @@ export async function POST() {
     }
 
     return NextResponse.json(
-      { success: true, userId, email: session.user.email },
+      { success: true, userId, email: session.user.email.trim().toLowerCase() },
       { status: 200 }
     );
   } catch (error) {

@@ -1,5 +1,9 @@
 import client from './turso';
 
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
 /**
  * Service de gestion des points utilisateurs
  */
@@ -37,8 +41,8 @@ export interface PointConfig {
  */
 async function getUserIdFromEmail(email: string): Promise<number | null> {
   const result = await client.execute({
-    sql: 'SELECT id FROM users WHERE email = ?',
-    args: [email],
+    sql: 'SELECT id FROM users WHERE lower(email) = ? LIMIT 1',
+    args: [normalizeEmail(email)],
   });
 
   if (result.rows.length === 0) {

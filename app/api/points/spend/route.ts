@@ -20,8 +20,9 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const { email, project_slug } = body;
+    const canonicalEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
 
-    if (!email || !project_slug) {
+    if (!canonicalEmail || !project_slug) {
       return NextResponse.json(
         { error: 'email and project_slug required' },
         { status: 400 }
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
     const { points_required, project_name } = project;
 
     // Vérifier le solde
-    const balance = await getUserBalance(email);
+    const balance = await getUserBalance(canonicalEmail);
     
     if (!balance || balance.balance < points_required) {
       return NextResponse.json(
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
     const sessionMinutes = points_required * config.point_minutes_value;
 
     // Débiter les points
-    const newBalance = await debitPoints(email, points_required, {
+    const newBalance = await debitPoints(canonicalEmail, points_required, {
       project_slug,
       project_name,
       session_minutes: sessionMinutes,
@@ -117,9 +118,10 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const email = searchParams.get('email');
+    const canonicalEmail = email ? email.trim().toLowerCase() : '';
     const project_slug = searchParams.get('project_slug');
 
-    if (!email || !project_slug) {
+    if (!canonicalEmail || !project_slug) {
       return NextResponse.json(
         { error: 'email and project_slug required' },
         { status: 400 }
@@ -140,7 +142,7 @@ export async function GET(req: NextRequest) {
     }
 
     const project = projectResult.rows[0] as any;
-    const balance = await getUserBalance(email);
+    const balance = await getUserBalance(canonicalEmail);
 
     const hasEnough = balance ? balance.balance >= project.points_required : false;
 

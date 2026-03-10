@@ -22,11 +22,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const email = session.user.email;
+    const email = session.user.email.trim().toLowerCase();
 
     // Get user ID from email
     const userResult = await client.execute({
-      sql: 'SELECT id FROM users WHERE email = ?',
+      sql: 'SELECT id FROM users WHERE lower(email) = ? LIMIT 1',
       args: [email],
     });
 
