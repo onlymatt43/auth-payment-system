@@ -4,6 +4,7 @@ import { capturePayPalOrder } from '@/lib/paypal';
 import { creditPoints } from '@/lib/points';
 import client from '@/lib/turso';
 import { createSafeLog } from '@/lib/log-sanitizer';
+import { applyPackagePricePolicy, getSecondActivePackageId, toNumber } from '@/lib/package-pricing';
 
 /**
  * GET /api/paypal/capture?token=xxx
@@ -72,7 +73,14 @@ export async function GET(req: NextRequest) {
 
     const packageData = packageResult.rows[0] as any;
     const expectedPoints = packageData.points;
-    const expectedPrice = parseFloat(packageData.price_usd);
+
+    const pricingResult = await client.execute({
+      sql: 'SELECT id, points, price_usd, active FROM point_packages WHERE active = true AND price_usd > 0 ORDER BY points ASC, id ASC',
+      args: [],
+    });
+    const secondActiveId = getSecondActivePackageId(pricingResult.rows as Array<Record<string, unknown>>);
+    const expectedPrice = applyPackagePricePolicy(toNumber(package_id), toNumber(packageData.price_usd), secondActiveId);
+
     const actualPrice = parseFloat(purchaseUnit?.amount?.value || '0');
 
     // Verify points match

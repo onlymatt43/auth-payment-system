@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import client from '@/lib/turso';
+import { normalizePackagesForShop } from '@/lib/package-pricing';
 
 /**
  * GET /api/packages
@@ -13,7 +14,7 @@ export async function GET() {
     });
 
     return NextResponse.json({
-      packages: result.rows,
+      packages: normalizePackagesForShop(result.rows as Array<Record<string, unknown>>),
     });
   } catch (error: any) {
     console.error('Fetch packages error:', error);

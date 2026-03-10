@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { createPayPalOrder } from '@/lib/paypal';
 import client from '@/lib/turso';
+import { applyPackagePricePolicy, getSecondActivePackageId, toNumber } from '@/lib/package-pricing';
 
 function isPayPalConfigured() {
   return !!process.env.PAYPAL_CLIENT_ID && !!process.env.PAYPAL_CLIENT_SECRET;
@@ -97,6 +98,13 @@ export async function POST(req: NextRequest) {
     const pkg = packageResult.rows[0] as any;
     const { name, points, price_usd } = pkg;
 
+    const pricingResult = await client.execute({
+      sql: 'SELECT id, points, price_usd, active FROM point_packages WHERE active = true AND price_usd > 0 ORDER BY points ASC, id ASC',
+      args: [],
+    });
+    const secondActiveId = getSecondActivePackageId(pricingResult.rows as Array<Record<string, unknown>>);
+    const effectivePriceUsd = applyPackagePricePolicy(toNumber(package_id), toNumber(price_usd), secondActiveId);
+
     // Créer la commande PayPal
     const customData = JSON.stringify({
       package_id,
@@ -105,7 +113,7 @@ export async function POST(req: NextRequest) {
     });
 
     const order = await createPayPalOrder(
-      price_usd.toFixed(2),
+      effectivePriceUsd.toFixed(2),
       `${name} (${points} points)`,
       customData
     );
@@ -124,7 +132,7 @@ export async function POST(req: NextRequest) {
       package: {
         name,
         points,
-        price: price_usd,
+        price: effectivePriceUsd,
       },
     });
   } catch (error: unknown) {
