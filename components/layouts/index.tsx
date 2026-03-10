@@ -2,13 +2,17 @@
 
 import { PropsWithChildren, ReactNode } from 'react';
 import { Card } from '@/components/ui';
+import { BrandBanner } from '@/components/BrandBanner';
 
 export function AuthLayout({ children, aside }: PropsWithChildren<{ aside?: ReactNode }>) {
   return (
     <main className="app-shell min-h-screen px-6 py-12 md:px-10">
-      <div className="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-[1.2fr_0.8fr]">
-        <Card className="animate-fade-in-up">{children}</Card>
-        {aside ? <Card className="animate-fade-in-up animation-delay-120">{aside}</Card> : null}
+      <div className="mx-auto w-full max-w-6xl space-y-6">
+        <BrandBanner compact />
+        <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+          <Card className="animate-fade-in-up">{children}</Card>
+          {aside ? <Card className="animate-fade-in-up animation-delay-120">{aside}</Card> : null}
+        </div>
       </div>
     </main>
   );
@@ -17,7 +21,10 @@ export function AuthLayout({ children, aside }: PropsWithChildren<{ aside?: Reac
 export function PaymentLayout({ children }: PropsWithChildren) {
   return (
     <main className="app-shell min-h-screen px-6 py-10 md:px-10 md:py-12">
-      <div className="mx-auto w-full max-w-6xl">{children}</div>
+      <div className="mx-auto w-full max-w-6xl space-y-6">
+        <BrandBanner compact />
+        {children}
+      </div>
     </main>
   );
 }
@@ -31,6 +38,7 @@ export function DashboardLayout({
   return (
     <main className="app-shell min-h-screen px-6 py-10 md:px-10 md:py-12">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+        <BrandBanner compact />
         <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="font-display text-4xl font-black uppercase tracking-tight text-text-primary md:text-5xl">{title}</h1>

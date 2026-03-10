@@ -14,7 +14,7 @@
     "subtitle": "Spin and earn points!",
     "notSignedIn": "Login to play!",
     "goToShop": "GO TO SHOP",
-    "freeSpinButton": "FREE SPIN (24h)",
+    "freeSpinButton": "SPIN",
     "paidSpinButton": "SPIN FOR {cost} PTS",
     "spinning": "SPINNING...",
     "or": "OR",
@@ -29,7 +29,16 @@
     "rule1": "1 free spin every 24h",
     "rule2": "Use your points for more spins",
     "rule3": "Win between 0 and 250 points",
-    "rule4": "Hit the JACKPOT and win BIG!"
+    "rule4": "Hit the JACKPOT and win BIG!",
+    "spinButton": "SPIN",
+    "usePointsButton": "USE MY POINTS ({cost} PTS)",
+    "buyPointsLink": "BUY POINTS",
+    "paidSpinHint": "You can also use {cost} points to play right now.",
+    "freeSpinIn": "Free spin in {time}",
+    "myPoints": "MY POINTS",
+    "loginRequiredShort": "LOGIN REQUIRED",
+    "profileInfoButton": "Mail info",
+    "loginInfoButton": "Login info"
   },
   "stamps": {
     "slots": {
@@ -64,6 +73,16 @@
       "error": {
         "title": "Error ⚠️",
         "message": "An error occurred. Try again."
+      },
+      "profileInfo": {
+        "title": "Mail profile",
+        "messageLoggedIn": "Email: {email}. Current balance: {points} points.",
+        "messageGuest": "No active profile. Sign in to see your email and balance."
+      },
+      "loginInfo": {
+        "title": "Login status",
+        "messageLoggedIn": "You are signed in as: {email}.",
+        "messageGuest": "You are not signed in. Use the Login page to access profile and purchases."
       }
     },
     "welcome": {
@@ -136,6 +155,14 @@
     "devCode": "Dev mode: use code {code} then click to continue.",
     "invalidCode": "Invalid code",
     "unexpected": "Unexpected error",
-    "cannotGenerate": "Unable to generate code"
+    "cannotGenerate": "Unable to generate code",
+    "firstTimeHint": "First login: enter your email to receive a security code.",
+    "returningHint": "You can sign in by email or directly with Google.",
+    "googleConnectedHint": "Signed in with Google: {email}",
+    "emailConnectedHint": "Signed in with email: {email}",
+    "googleAfterEmailHint": "You can now use Google for faster sign-ins on your next visits.",
+    "logout": "Log out",
+    "continueToShop": "Continue to shop",
+    "googleUnavailable": "Google sign-in is not available locally. Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env.local."
   }
 }

@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Badge, Button, Card } from '@/components/ui';
 
-const SLOT_VIDEO_URL = 'https://vz-72668a20-6b9.b-cdn.net/df453168-ac8b-439f-baaa-a999bccd56e2/play_480p.mp4';
+const SLOT_VIDEO_URL = '/media/velvet-big-in-out.mp4';
 
 export function CTAButtons() {
   const router = useRouter();
@@ -28,7 +28,7 @@ export function CTAButtons() {
           <Badge tone="accent">Bonus</Badge>
           <h3 className="mt-4 font-display text-3xl font-black uppercase tracking-tight text-text-primary">Play Slot Mode</h3>
           <p className="mt-3 max-w-xl text-text-secondary">Try the slot and win additional free points every day.</p>
-          <Button onClick={() => router.push('/slots')} tone="accent" size="lg" className="mt-8 min-w-[220px]">
+          <Button data-testid="cta-get-onlypoints" onClick={() => router.push('/slots')} tone="accent" size="lg" className="mt-8 min-w-[220px]">
             Launch Slots
           </Button>
         </div>

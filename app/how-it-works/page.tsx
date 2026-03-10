@@ -1,9 +1,14 @@
 'use client';
 
+import { BrandBanner } from '@/components/BrandBanner';
+
 export default function HowItWorks() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-dark-darker via-dark-navy to-dark-blue text-white p-6 md:p-12">
-      <div className="max-w-4xl mx-auto">
+    <main className="app-shell min-h-screen p-6 text-white md:p-12">
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-6">
+          <BrandBanner compact />
+        </div>
         {/* Header */}
         <div className="mb-12 text-center">
           <h1 className="text-5xl md:text-6xl font-black mb-4 tracking-tighter">

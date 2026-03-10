@@ -1,3 +1,4 @@
+-- DEPRECATED: Use scripts/schema.sql with npm run db:migrate
 -- Migration: Système de points OnlyMatt
 -- Création des tables pour boutique de points avec PayPal
 

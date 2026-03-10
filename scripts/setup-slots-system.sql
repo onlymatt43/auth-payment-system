@@ -1,3 +1,4 @@
+-- DEPRECATED: Use scripts/schema.sql with npm run db:migrate
 -- Slot Machine System Tables
 
 -- Table pour les spins des utilisateurs

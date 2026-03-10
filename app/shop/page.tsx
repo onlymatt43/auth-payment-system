@@ -145,40 +145,21 @@ export default function ShopPage() {
   return (
     <PaymentLayout>
       <div className="space-y-8">
-        <header className="flex justify-end">
-          <LanguageSwitcher />
+        <header className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          {session?.user?.email ? (
+            <p className="text-sm text-text-secondary break-all">{session.user.email}</p>
+          ) : (
+            <p className="text-sm text-text-muted" data-testid="shop-login-reminder">{t('shop.loginReminder')}</p>
+          )}
+          <div className="flex items-center gap-2">
+            <Button type="button" variant="outline" tone="neutral" size="sm" onClick={() => router.push('/login')} data-testid="shop-login-button">
+              Log in
+            </Button>
+            <LanguageSwitcher />
+          </div>
         </header>
 
         {errorMessage && <Alert tone="danger">{errorMessage}</Alert>}
-
-        <Card className="border-accent/40 animate-fade-in-up">
-          {session ? (
-            <div className="grid gap-4 md:grid-cols-[84px_1fr_1fr] md:items-center">
-              <div className="mx-auto h-20 w-20 rounded-full border border-border-default bg-surface-elevated" />
-              <div className="rounded-2xl border border-border-default bg-surface-elevated px-4 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-muted">Email</p>
-                <p className="mt-2 text-lg font-semibold text-text-primary break-all">{session.user?.email}</p>
-              </div>
-              <div className="grid gap-3 md:grid-cols-2">
-                <div className="rounded-2xl border border-brand/40 bg-brand/10 px-4 py-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">{t('shop.balance')}</p>
-                  <p className="mt-2 font-display text-3xl font-black text-brand">{balance?.balance ?? 0} {t('common.pointsAbbr')}</p>
-                </div>
-                <div className="rounded-2xl border border-danger/40 bg-danger/10 px-4 py-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-danger">{t('shop.totalBought')}</p>
-                  <p className="mt-2 font-display text-3xl font-black text-danger">{formatUsd(balance?.total_spent)}</p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <p className="font-display text-2xl font-black text-brand" data-testid="shop-login-headline">{t('shop.connect')}</p>
-              <Button type="button" onClick={() => router.push('/login')} data-testid="shop-login-button" size="lg">
-                {t('shop.connect')}
-              </Button>
-            </div>
-          )}
-        </Card>
 
         <section className="space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -219,7 +200,6 @@ export default function ShopPage() {
         </section>
 
         <section className="animate-fade-in-up">
-          <SectionHeader title="Explore More" description="Additional ways to use and earn points." />
           <div className="mt-4">
             <CTAButtons />
           </div>

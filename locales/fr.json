@@ -14,7 +14,7 @@
     "subtitle": "Spin et gagne des points!",
     "notSignedIn": "Connecte-toi pour jouer!",
     "goToShop": "ALLER À LA BOUTIQUE",
-    "freeSpinButton": "SPIN GRATUIT (24h)",
+    "freeSpinButton": "SPIN",
     "paidSpinButton": "SPIN POUR {cost} PTS",
     "spinning": "SPINNING...",
     "or": "OU",
@@ -29,7 +29,16 @@
     "rule1": "1 spin gratuit par 24h",
     "rule2": "Utilise tes points pour plus de spins",
     "rule3": "Gagne entre 0 et 250 points",
-    "rule4": "Déclenche le JACKPOT et gagne BIG!"
+    "rule4": "Déclenche le JACKPOT et gagne BIG!",
+    "spinButton": "SPIN",
+    "usePointsButton": "UTILISER MES POINTS ({cost} PTS)",
+    "buyPointsLink": "ACHETER DES POINTS",
+    "paidSpinHint": "Tu peux aussi utiliser {cost} points pour jouer tout de suite.",
+    "freeSpinIn": "Spin gratuit dans {time}",
+    "myPoints": "MES POINTS",
+    "loginRequiredShort": "CONNEXION REQUISE",
+    "profileInfoButton": "Infos mail",
+    "loginInfoButton": "Infos login"
   },
   "stamps": {
     "slots": {
@@ -64,6 +73,16 @@
       "error": {
         "title": "Erreur ⚠️",
         "message": "Une erreur s'est produite. Réessaie."
+      },
+      "profileInfo": {
+        "title": "Profil mail",
+        "messageLoggedIn": "Email: {email}. Solde actuel: {points} points.",
+        "messageGuest": "Aucun profil actif. Connecte-toi pour voir ton email et ton solde."
+      },
+      "loginInfo": {
+        "title": "Statut connexion",
+        "messageLoggedIn": "Tu es connecté avec: {email}.",
+        "messageGuest": "Tu n'es pas connecté. Utilise la page Login pour accéder au profil et aux achats."
       }
     },
     "welcome": {
@@ -136,6 +155,14 @@
     "devCode": "Mode dev: utilise le code {code} puis clique pour continuer.",
     "invalidCode": "Code invalide",
     "unexpected": "Erreur inattendue",
-    "cannotGenerate": "Impossible de générer le code"
+    "cannotGenerate": "Impossible de générer le code",
+    "firstTimeHint": "Première connexion: entre ton email pour recevoir un code de sécurité.",
+    "returningHint": "Tu peux te connecter par email ou directement avec Google.",
+    "googleConnectedHint": "Connecté avec Google: {email}",
+    "emailConnectedHint": "Connecté avec email: {email}",
+    "googleAfterEmailHint": "Tu peux maintenant utiliser Google pour te connecter plus vite lors des prochaines visites.",
+    "logout": "Se déconnecter",
+    "continueToShop": "Continuer vers la boutique",
+    "googleUnavailable": "Connexion Google non disponible en local. Ajoute GOOGLE_CLIENT_ID et GOOGLE_CLIENT_SECRET dans .env.local."
   }
 }

@@ -1,9 +1,14 @@
 'use client';
 
+import { BrandBanner } from '@/components/BrandBanner';
+
 export default function PrivacyPolicy() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-dark-darker via-dark-navy to-dark-blue text-white p-6 md:p-12">
       <div className="max-w-4xl mx-auto">
+        <div className="mb-6">
+          <BrandBanner compact />
+        </div>
         {/* Header */}
         <div className="mb-12 text-center">
           <h1 className="text-5xl md:text-6xl font-black mb-4 tracking-tighter">

@@ -9,6 +9,14 @@ const spinAttempts = new Map<string, number[]>();
 const RATE_LIMIT_WINDOW_MS = 3600000; // 1 hour
 const RATE_LIMIT_MAX_SPINS = 5; // 5 spins per hour
 
+function parseSqliteUtcDate(value: string): Date {
+  // SQLite CURRENT_TIMESTAMP is UTC without timezone (YYYY-MM-DD HH:MM:SS).
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(value)) {
+    return new Date(value.replace(' ', 'T') + 'Z');
+  }
+  return new Date(value);
+}
+
 function checkAndRecordFallbackRateLimit(email: string): { allowed: boolean; remaining: number } {
   const now = Date.now();
   const attempts = spinAttempts.get(email) || [];
@@ -26,13 +34,13 @@ function checkAndRecordFallbackRateLimit(email: string): { allowed: boolean; rem
 
 // Résultats possibles des slots
 const SLOT_OUTCOMES = [
-  { points: 0, probability: 0.40, reels: ['🎯', '💎', '🎪'], multiplier: 0 },
-  { points: 5, probability: 0.25, reels: ['🍒', '🍒', '🎪'], multiplier: 1 },
-  { points: 10, probability: 0.15, reels: ['🍒', '🍒', '🍒'], multiplier: 1 },
-  { points: 25, probability: 0.10, reels: ['💎', '💎', '🎪'], multiplier: 2.5 },
-  { points: 50, probability: 0.06, reels: ['💎', '💎', '💎'], multiplier: 5 },
-  { points: 100, probability: 0.03, reels: ['👑', '👑', '🎪'], multiplier: 10 },
-  { points: 250, probability: 0.01, reels: ['👑', '👑', '👑'], multiplier: 25, jackpot: true },
+  { points: 0, probability: 0.40, reels: ['3', '4', '3'], multiplier: 0 },
+  { points: 5, probability: 0.25, reels: ['3', '3', '4'], multiplier: 1 },
+  { points: 10, probability: 0.15, reels: ['3', '3', '3'], multiplier: 1 },
+  { points: 25, probability: 0.10, reels: ['4', '4', '3'], multiplier: 2.5 },
+  { points: 50, probability: 0.06, reels: ['4', '4', '4'], multiplier: 5 },
+  { points: 100, probability: 0.03, reels: ['🍁', '🍁', '4'], multiplier: 10 },
+  { points: 250, probability: 0.01, reels: ['🍁', '🍁', '🍁'], multiplier: 25, jackpot: true },
 ];
 
 function selectOutcome(): typeof SLOT_OUTCOMES[0] {
@@ -70,7 +78,7 @@ async function checkDailyFreeSpinEligibility(userId: number) {
     return true;
   }
 
-  const lastSpin = new Date(result.rows[0].last_free_spin as string);
+  const lastSpin = parseSqliteUtcDate(result.rows[0].last_free_spin as string);
   const now = new Date();
   const hoursSinceLastSpin = (now.getTime() - lastSpin.getTime()) / (1000 * 60 * 60);
 
@@ -212,30 +220,59 @@ export async function spinSlots(payWithPoints: boolean = false, pointsCost: numb
       await addPoints(userId, outcome.points);
     }
 
-    // Record the spin
-    const spinRecord = await client.execute({
-      sql: `
-        INSERT INTO user_spins (
-          user_id, 
-          email,
-          spin_cost, 
-          spin_result, 
-          reels, 
-          multiplier, 
-          is_jackpot
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-      `,
-      args: [
-        userId,
-        session.user.email,
-        payWithPoints ? pointsCost : 0,
-        outcome.points,
-        JSON.stringify(outcome.reels),
-        outcome.multiplier,
-        outcome.jackpot ? 1 : 0,
-      ],
-    });
+    // Record the spin (compatible with old and new DB schemas)
+    try {
+      await client.execute({
+        sql: `
+          INSERT INTO user_spins (
+            user_id,
+            email,
+            spin_cost,
+            spin_result,
+            reels,
+            multiplier,
+            is_jackpot
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `,
+        args: [
+          userId,
+          session.user.email,
+          payWithPoints ? pointsCost : 0,
+          outcome.points,
+          JSON.stringify(outcome.reels),
+          outcome.multiplier,
+          outcome.jackpot ? 1 : 0,
+        ],
+      });
+    } catch (insertError) {
+      const message = insertError instanceof Error ? insertError.message : String(insertError);
+      if (!message.includes('no column named email')) {
+        throw insertError;
+      }
+
+      await client.execute({
+        sql: `
+          INSERT INTO user_spins (
+            user_id,
+            spin_cost,
+            spin_result,
+            reels,
+            multiplier,
+            is_jackpot
+          )
+          VALUES (?, ?, ?, ?, ?, ?)
+        `,
+        args: [
+          userId,
+          payWithPoints ? pointsCost : 0,
+          outcome.points,
+          JSON.stringify(outcome.reels),
+          outcome.multiplier,
+          outcome.jackpot ? 1 : 0,
+        ],
+      });
+    }
 
     // Get updated balance
     const balanceResult = await client.execute({

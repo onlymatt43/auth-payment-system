@@ -26,11 +26,11 @@ test.describe('Shop page (signed out)', () => {
     await expect(disabledButton).toBeDisabled();
   });
 
-  test('CTA button routes unsigned visitors to /login', async ({ page }) => {
+  test('CTA button routes to slots experience', async ({ page }) => {
     await page.goto('/shop');
 
     await page.getByTestId('cta-get-onlypoints').click();
-    await page.waitForURL(/\/login$/);
-    await expect(page).toHaveURL(/\/login$/);
+    await page.waitForURL(/\/slots$/);
+    await expect(page).toHaveURL(/\/slots$/);
   });
 });

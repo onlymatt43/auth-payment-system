@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { spinSlots } from '@/lib/slots';
 import { useI18n } from '@/lib/use-i18n';
 import { useStamp, StampContainer } from '@/components/Stamp';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
-import { useDeviceMotion, getMotionTransform } from '@/lib/use-device-motion';
-import { MotionEffects } from '@/components/MotionEffects';
+import { BrandBanner } from '@/components/BrandBanner';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,52 +22,39 @@ interface SpinResult {
   error?: string;
 }
 
+const REEL_ICONS = ['🍁', '4', '3'];
+const PAID_SPIN_COST = 10;
+
 export default function SlotsPage() {
   const { data: session, status } = useSession();
-  const router = useRouter();  const { t } = useI18n();
+  const router = useRouter();
+  const { t } = useI18n();
   const { stamps, addStamp, removeStamp } = useStamp();
-  const { normalizedX, normalizedY } = useDeviceMotion();
   const firstLoadRef = useRef(true);
+
   const [isSpinning, setIsSpinning] = useState(false);
-  const [reels, setReels] = useState(['🎪', '🎪', '🎪']);
+  const [reels, setReels] = useState(['4', '3', '4']);
   const [result, setResult] = useState<SpinResult | null>(null);
   const [balance, setBalance] = useState(0);
   const [showResult, setShowResult] = useState(false);
-  const [canPayWithPoints, setCanPayWithPoints] = useState(false);
-  const [pointsCost, setPointsCost] = useState(10);
   const [nextFreeSpinTime, setNextFreeSpinTime] = useState<Date | null>(null);
-  const [rateLimitData, setRateLimitData] = useState<{ remaining: number; resetTime: string } | null>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  // Load user balance and check free spin eligibility
   useEffect(() => {
-    if (session?.user?.email) {
-      fetchBalance();
-      checkFreeSpinStatus();
-    }
-  }, [session]);
+    if (!session?.user?.email) return;
+    fetchBalance();
+    checkFreeSpinStatus();
+  }, [session?.user?.email]);
 
-  // Track mouse position for desktop hover effects
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
+    if (!firstLoadRef.current || !session?.user?.email) return;
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  // Show welcome stamp on first load
-  useEffect(() => {
-    if (firstLoadRef.current && session?.user?.email) {
-      firstLoadRef.current = false;
-      addStamp({
-        type: 'custom',
-        title: t('stamps.slots.welcome.title'),
-        message: t('stamps.slots.welcome.message'),
-        emoji: '🎰',
-      });
-    }
+    firstLoadRef.current = false;
+    addStamp({
+      type: 'custom',
+      title: t('stamps.slots.welcome.title'),
+      message: t('stamps.slots.welcome.message'),
+      emoji: '🎰',
+    });
   }, [session?.user?.email, addStamp, t]);
 
   async function fetchBalance() {
@@ -84,17 +71,19 @@ export default function SlotsPage() {
     try {
       const res = await fetch('/api/slots/check-free-spin');
       const data = await res.json();
-      
-      if (!data.canSpin) {
-        setNextFreeSpinTime(new Date(data.nextSpinTime));
+
+      if (data.canSpin) {
+        setNextFreeSpinTime(null);
+        return;
       }
+
+      setNextFreeSpinTime(new Date(data.nextSpinTime));
     } catch (error) {
       console.error('Failed to check free spin status:', error);
     }
   }
 
-  async function handleSpin(payWithPoints = false, forcedCost?: number) {
-    const selectedCost = forcedCost ?? pointsCost;
+  async function handleSpin(payWithPoints = false) {
     if (isSpinning) return;
 
     if (!session?.user?.email) {
@@ -102,13 +91,12 @@ export default function SlotsPage() {
       return;
     }
 
-    // Check if user has enough points for paid spin
-    if (payWithPoints && balance < selectedCost) {
+    if (payWithPoints && balance < PAID_SPIN_COST) {
       addStamp({
         type: 'custom',
         title: t('stamps.slots.insufficientPoints.title'),
         message: t('stamps.slots.insufficientPoints.message', {
-          need: selectedCost,
+          need: PAID_SPIN_COST,
           have: balance,
         }),
         emoji: '❌',
@@ -116,13 +104,12 @@ export default function SlotsPage() {
       return;
     }
 
-    // Check if user can do free spin
-    if (!payWithPoints && nextFreeSpinTime && new Date() < nextFreeSpinTime) {
-      const timeUntil = Math.ceil((nextFreeSpinTime.getTime() - new Date().getTime()) / 1000 / 60);
+    if (!payWithPoints && nextFreeSpinTime && Date.now() < nextFreeSpinTime.getTime()) {
+      const minutes = Math.ceil((nextFreeSpinTime.getTime() - Date.now()) / 60000);
       addStamp({
         type: 'custom',
         title: t('stamps.slots.freeSpinCooldown.title'),
-        message: t('stamps.slots.freeSpinCooldown.message', { minutes: timeUntil }),
+        message: `${t('stamps.slots.freeSpinCooldown.message', { minutes })} ${t('slots.paidSpinHint', { cost: PAID_SPIN_COST })}`,
         emoji: '⏰',
       });
       return;
@@ -131,23 +118,18 @@ export default function SlotsPage() {
     setIsSpinning(true);
     setShowResult(false);
 
-    // Animate reels spinning
     const spinAnimation = setInterval(() => {
-      const possibleReels = ['🍒', '💎', '👑', '🎯', '🎪'];
       setReels([
-        possibleReels[Math.floor(Math.random() * possibleReels.length)],
-        possibleReels[Math.floor(Math.random() * possibleReels.length)],
-        possibleReels[Math.floor(Math.random() * possibleReels.length)],
+        REEL_ICONS[Math.floor(Math.random() * REEL_ICONS.length)],
+        REEL_ICONS[Math.floor(Math.random() * REEL_ICONS.length)],
+        REEL_ICONS[Math.floor(Math.random() * REEL_ICONS.length)],
       ]);
-    }, 100);
+    }, 90);
 
-    // Call server action directly
-    const spinResult = await spinSlots(payWithPoints, payWithPoints ? selectedCost : 0);
+    const spinResult = await spinSlots(payWithPoints, payWithPoints ? PAID_SPIN_COST : 0);
 
-    // Stop animation
     clearInterval(spinAnimation);
 
-    // Set final reels
     if (spinResult.success && spinResult.reels) {
       setReels(spinResult.reels);
     }
@@ -155,7 +137,6 @@ export default function SlotsPage() {
     setResult(spinResult);
     setShowResult(true);
 
-    // Show contextual stamp based on result
     if (spinResult.success) {
       if (spinResult.isJackpot) {
         addStamp({
@@ -163,7 +144,7 @@ export default function SlotsPage() {
           title: t('stamps.slots.jackpot.title'),
           message: t('stamps.slots.jackpot.message', { points: spinResult.result }),
           emoji: '🏆',
-          duration: 0, // Persistent
+          duration: 0,
         });
       } else if (spinResult.result && spinResult.result > 100) {
         addStamp({
@@ -181,17 +162,14 @@ export default function SlotsPage() {
         });
       }
 
-      // Update balance if successful
       if (spinResult.newBalance !== undefined) {
         setBalance(spinResult.newBalance);
       }
 
-      // Update free spin status
       if (!payWithPoints) {
         checkFreeSpinStatus();
       }
     } else {
-      // Handle errors with stamps
       if (spinResult.error?.includes('rate limit') || spinResult.error?.includes('5 spins')) {
         addStamp({
           type: 'custom',
@@ -199,11 +177,6 @@ export default function SlotsPage() {
           message: t('stamps.slots.rateLimit.message'),
           emoji: '🛑',
         });
-        // Parse rate limit info from error if available
-        const match = spinResult.error?.match(/(\d+) remaining/);
-        if (match) {
-          setRateLimitData({ remaining: parseInt(match[1]), resetTime: 'in 1 hour' });
-        }
       } else {
         addStamp({
           type: 'custom',
@@ -213,215 +186,229 @@ export default function SlotsPage() {
         });
       }
 
-      // Refetch balance on error to ensure sync
       await fetchBalance();
     }
 
     setIsSpinning(false);
   }
 
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-dark-darker via-dark-navy to-dark-blue flex items-center justify-center">
-        <div className="text-4xl glow-blue">⚡</div>
-      </div>
-    );
+  function handleProfileInfoClick() {
+    if (session?.user?.email) {
+      addStamp({
+        type: 'custom',
+        title: t('stamps.slots.profileInfo.title'),
+        message: t('stamps.slots.profileInfo.messageLoggedIn', {
+          email: session.user.email,
+          points: balance,
+        }),
+      });
+      return;
+    }
+
+    addStamp({
+      type: 'custom',
+      title: t('stamps.slots.profileInfo.title'),
+      message: t('stamps.slots.profileInfo.messageGuest'),
+    });
   }
 
-  if (!session) {
+  function handleLoginInfoClick() {
+    if (session?.user?.email) {
+      addStamp({
+        type: 'custom',
+        title: t('stamps.slots.loginInfo.title'),
+        message: t('stamps.slots.loginInfo.messageLoggedIn', {
+          email: session.user.email,
+        }),
+      });
+      return;
+    }
+
+    addStamp({
+      type: 'custom',
+      title: t('stamps.slots.loginInfo.title'),
+      message: t('stamps.slots.loginInfo.messageGuest'),
+    });
+  }
+
+
+  if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-dark-darker via-dark-navy to-dark-blue flex items-center justify-center p-6">
-        <div className="neon-border-yellow glass-dark rounded-3xl p-12 text-center">
-          <p className="text-gray-400 mb-8">{t('slots.notSignedIn')}</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-5xl">🎰</div>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-dark-darker via-dark-navy to-dark-blue text-white p-6 md:p-12">
-      <MotionEffects />
-      <div className="max-w-2xl mx-auto">
-        {/* Header with Language Switcher */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-12">
-          <div className="flex items-center gap-3 md:justify-end">
+    <main className="relative min-h-screen overflow-hidden px-4 py-8 text-white md:px-8 md:py-12">
+      <video
+        className="pointer-events-none fixed inset-0 h-full w-full object-cover"
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="metadata"
+        aria-hidden="true"
+      >
+        <source src="/media/velvet-in-out.mp4" type="video/mp4" />
+      </video>
+      <div className="pointer-events-none fixed inset-0 bg-black/50" aria-hidden="true" />
+      <div className="relative z-10 mx-auto w-full max-w-5xl">
+        <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <BrandBanner />
+          <div className="flex items-center gap-2">
             <LanguageSwitcher />
-          </div>
-        </div>
-        <div className="h-1 bg-gradient-to-r from-neon-yellow via-neon-pink to-neon-blue mb-12"></div>
-
-        {/* Balance Display */}
-        <div className="neon-border-yellow glass-dark rounded-3xl p-8 mb-12 hover-lift hover-glow animate-float">
-          <div className="text-center">
-            <p className="text-neon-yellow text-xs tracking-widest font-bold mb-2 animate-twinkle">{t('common.balance')}</p>
-            <p className="text-5xl font-black glow-yellow">{balance}</p>
-            <p className="text-gray-400 text-sm mt-2">{t('common.pointsLabel')}</p>
-          </div>
-        </div>
-
-        {/* Free Spin Status */}
-        {nextFreeSpinTime && (
-          <div className="neon-border-blue glass-dark rounded-3xl p-4 mb-8 text-sm">
-            <p className="text-neon-blue">
-              ⏰ {t('slots.freeSpinAvailable')}
-            </p>
-          </div>
-        )}
-
-        {/* Slot Machine */}
-        <div className="neon-border-pink glass-dark rounded-3xl p-8 mb-12 hover-lift">
-          {/* Reels */}
-          <div className="relative mb-8 overflow-hidden rounded-2xl border border-neon-blue/40">
-            <video
-              className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="metadata"
-              aria-hidden="true"
+            <Link
+              href="/shop"
+              className="rounded-xl border border-amber-300/70 bg-amber-200/10 px-4 py-2 text-sm font-bold tracking-wide text-amber-100 hover:bg-amber-200/20"
             >
-              <source src="https://vz-72668a20-6b9.b-cdn.net/df453168-ac8b-439f-baaa-a999bccd56e2/play_480p.mp4" type="video/mp4" />
-            </video>
-            <div className="pointer-events-none absolute inset-0 bg-black/45" aria-hidden="true" />
-            <div className="relative z-10 flex justify-center gap-4 p-4 md:p-6">
-              {reels.map((reel, idx) => (
-                <div
-                  key={idx}
-                  className={`w-20 h-20 md:w-24 md:h-24 rounded-2xl neon-border-blue glass flex items-center justify-center text-4xl md:text-6xl transition-transform duration-100 ${
-                    isSpinning ? 'animate-bounce' : ''
-                  }`}
-                  style={{
-                    transform: !isSpinning ? getMotionTransform(normalizedX, normalizedY, 0.5) : 'none',
-                    transitionProperty: isSpinning ? 'none' : 'transform',
-                  }}
+              ← {t('slots.goToShop')}
+            </Link>
+          </div>
+        </header>
+
+        <section
+          className="relative overflow-hidden rounded-[2rem] border border-amber-200/40 bg-cover bg-center p-4 shadow-[0_0_80px_rgba(244,63,94,0.25)] md:p-8"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(34, 10, 10, 0.62), rgba(34, 10, 10, 0.62)), url('/media/velvet-droit.png')",
+          }}
+        >
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.2)_0%,transparent_35%,transparent_65%,rgba(255,255,255,0.2)_100%)] opacity-40" />
+
+          <div className="mb-6 grid grid-cols-8 gap-2">
+            {Array.from({ length: 24 }).map((_, i) => (
+              <span
+                key={i}
+                className="h-2 w-full rounded-full bg-amber-200"
+                style={{
+                  opacity: 0.45 + (i % 3) * 0.18,
+                  boxShadow: '0 0 10px rgba(251, 191, 36, 0.8)',
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="mx-auto w-full max-w-2xl space-y-6">
+            <div className="rounded-[1.6rem] border-4 border-amber-200/70 bg-gradient-to-b from-[#241005] to-[#120803] p-5 md:p-7">
+              <button
+                onClick={() => handleSpin(false)}
+                disabled={isSpinning}
+                className="mb-4 w-full rounded-2xl border border-amber-200 bg-gradient-to-b from-amber-300 to-amber-500 px-5 py-4 text-base font-black uppercase tracking-wider text-black shadow-[0_10px_30px_rgba(251,191,36,0.45)] transition hover:brightness-105 disabled:opacity-60"
+              >
+                {isSpinning ? `⏳ ${t('slots.spinning')}` : t('slots.spinButton')}
+              </button>
+
+              <div className="mb-4 rounded-xl border border-amber-100/20 bg-black/40 px-4 py-3">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-100/80">{t('slots.myPoints')}</p>
+                <p className="mt-1 text-2xl font-black text-amber-200">
+                  {session?.user?.email ? balance : t('slots.loginRequiredShort')}{' '}
+                  {session?.user?.email && <span className="text-sm text-amber-100/80">{t('common.pointsAbbr')}</span>}
+                </p>
+              </div>
+
+              {balance < PAID_SPIN_COST && (
+                <Link
+                  href="/shop"
+                  className="mt-3 inline-block text-xs font-bold tracking-[0.14em] text-amber-200 hover:text-amber-100"
                 >
-                  {reel}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Spin Buttons */}
-          <div className="space-y-4">
-            <button
-              onClick={() => handleSpin(false)}
-              disabled={isSpinning}
-              className="btn-neon w-full disabled:opacity-50 disabled:cursor-not-allowed hover-lift hover-glow transition-all duration-300"
-            >
-              {isSpinning ? `⏳ ${t('slots.spinning')}` : `🎯 ${t('slots.freeSpinButton')}`}
-            </button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-700"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gradient-to-br from-dark-darker via-dark-navy to-dark-blue text-gray-400">
-                  {t('slots.or')}
-                </span>
-              </div>
-            </div>
-
-            {/* Points cost selector */}
-            <div className="bg-dark-navy rounded-lg p-4 mb-4 hover-lift">
-              <p className="text-gray-400 text-sm mb-3">{t('slots.payWithPoints')}</p>
-              <div className="flex gap-2">
-                {[10, 25, 50].map((cost) => (
-                  <button
-                    key={cost}
-                    onClick={() => {
-                      setPointsCost(cost);
-                      if (balance >= cost) {
-                        void handleSpin(true, cost);
-                      } else {
-                        router.push(`/shop?source=slots&need_points=`);
-                      }
-                    }}
-                    className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all duration-300 ${
-                      pointsCost === cost
-                        ? 'bg-neon-pink text-white hover-glow'
-                        : 'bg-dark-blue border border-gray-600 text-gray-400 hover:border-neon-pink hover-lift'
-                    }`}
-                  >
-                    {cost} {t('common.pointsAbbr')}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <button
-              onClick={() => handleSpin(true)}
-              disabled={isSpinning || balance < pointsCost}
-              className={`w-full py-3 rounded-lg font-bold transition-all duration-300 ${
-                balance < pointsCost
-                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                  : 'btn-pink disabled:opacity-50 disabled:cursor-not-allowed hover-lift hover-glow'
-              }`}
-            >
-              {isSpinning ? `⏳ ${t('slots.spinning')}` : `💰 ${t('slots.paidSpinButton', { cost: pointsCost })}`}
-            </button>
-          </div>
-        </div>
-
-        {/* Result Modal */}
-        {showResult && result && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className={`neon-border-${result.success ? 'yellow' : 'pink'} glass-dark rounded-3xl p-12 max-w-md w-full text-center animate-pulse`}>
-              {result.success ? (
-                <>
-                  <div className="text-6xl mb-4">
-                    {result.isJackpot ? '🏆' : '✨'}
-                  </div>
-                  <h2 className={`text-4xl font-black mb-4 ${result.isJackpot ? 'glow-yellow' : 'glow-pink'}`}>
-                    {result.result === 0 ? t('slots.lost') : t('slots.won')}
-                  </h2>
-                  <p className="text-2xl font-black text-neon-yellow mb-6">
-                    +{result.result} {t('common.pointsAbbr')}
-                  </p>
-                  {result.multiplier && result.multiplier > 1 && (
-                    <p className="text-lg text-neon-blue mb-4">
-                      {t('slots.multiplier')}: {result.multiplier}x
-                    </p>
-                  )}
-                  <p className="text-gray-400 mb-8">
-                    {t('slots.newBalance')}: <span className="text-white font-bold">{result.newBalance}</span>
-                  </p>
-                </>
-              ) : (
-                <>
-                  <div className="text-6xl mb-4">❌</div>
-                  <h2 className="text-2xl font-black glow-pink mb-4">{t('slots.error')}</h2>
-                  <p className="text-gray-400">{result.error}</p>
-                </>
+                  → {t('slots.buyPointsLink')}
+                </Link>
               )}
 
-              <button
-                onClick={() => setShowResult(false)}
-                className="btn-neon w-full mt-8"
-              >
-                {t('common.close')}
-              </button>
+              <div className="mt-6 rounded-xl border border-amber-300/30 bg-amber-300/10 p-4 text-sm text-amber-50/90">
+                <h3 className="mb-2 text-sm font-black uppercase tracking-[0.14em] text-amber-100">{t('slots.howItWorks')}</h3>
+                <div className="mb-3 flex items-center gap-2">
+                  <button
+                    onClick={handleProfileInfoClick}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-amber-200/70 bg-black/40 text-amber-100 hover:bg-black/60"
+                    aria-label={t('slots.profileInfoButton')}
+                    title={t('slots.profileInfoButton')}
+                  >
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="5" width="18" height="14" rx="2" />
+                      <path d="m4 7 8 6 8-6" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handleLoginInfoClick}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-amber-200/70 bg-black/40 text-amber-100 hover:bg-black/60"
+                    aria-label={t('slots.loginInfoButton')}
+                    title={t('slots.loginInfoButton')}
+                  >
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                      <path d="M10 17l5-5-5-5" />
+                      <path d="M15 12H3" />
+                    </svg>
+                  </button>
+                </div>
+                <StampContainer
+                  variant="inline"
+                  stamps={stamps}
+                  onRemove={removeStamp}
+                  empty={
+                    <ul className="space-y-1 text-xs md:text-sm">
+                      <li>• {t('slots.rule1')}</li>
+                      <li>• {t('slots.rule2')}</li>
+                      <li>• {t('slots.rule3')}</li>
+                      <li>• {t('slots.rule4')}</li>
+                    </ul>
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="rounded-[1.6rem] border-4 border-amber-200/70 bg-gradient-to-b from-[#2f2720] to-[#11100d] p-5 md:p-7">
+              <div className="rounded-2xl border border-zinc-700 bg-zinc-900/90 p-3 md:p-5">
+                <div className="grid grid-cols-3 gap-3 md:gap-4">
+                  {reels.map((reel, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex h-24 items-center justify-center rounded-xl border border-zinc-500 bg-gradient-to-b from-zinc-100 to-zinc-300 text-5xl shadow-inner md:h-28 md:text-6xl ${
+                        isSpinning ? 'animate-pulse' : ''
+                      }`}
+                    >
+                      {reel}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-        )}
-
-        {/* Info */}
-        <div className="neon-border-blue glass rounded-3xl p-8 hover-lift hover-glow animate-gradient-shift" style={{
-          backgroundImage: 'linear-gradient(135deg, rgba(0, 217, 255, 0.1) 0%, rgba(255, 0, 110, 0.05) 50%, rgba(255, 255, 0, 0.1) 100%)',
-          backgroundSize: '200% 200%',
-        }}>
-          <h3 className="text-xl font-black text-neon-blue mb-4 animate-twinkle">{t('slots.howItWorks')}</h3>
-          <ul className="space-y-2 text-sm text-gray-300">
-            <li className="hover-scale transition-transform duration-300">✅ <span className="text-neon-yellow">{t('slots.rule1')}</span></li>
-            <li className="hover-scale transition-transform duration-300">✅ {t('slots.rule2')}</li>
-            <li className="hover-scale transition-transform duration-300">✅ {t('slots.rule3')}</li>
-            <li className="hover-scale transition-transform duration-300">🏆 {t('slots.rule4')}</li>
-          </ul>
-        </div>
+        </section>
       </div>
 
-      {/* Stamp Container */}
-      <StampContainer stamps={stamps} onRemove={removeStamp} />    </main>
+      {showResult && result && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-amber-200/70 bg-gradient-to-b from-[#2a1712] to-[#120905] p-8 text-center shadow-[0_0_70px_rgba(251,191,36,0.3)]">
+            {result.success ? (
+              <>
+                <div className="mb-4 text-6xl">{result.isJackpot ? '🏆' : result.result === 0 ? '🎲' : '✨'}</div>
+                <h2 className="mb-2 text-3xl font-black uppercase tracking-wide text-amber-100">{result.result === 0 ? t('slots.lost') : t('slots.won')}</h2>
+                <p className="mb-4 text-2xl font-black text-amber-200">+{result.result} {t('common.pointsAbbr')}</p>
+                {result.multiplier && result.multiplier > 1 && <p className="mb-2 text-zinc-300">{t('slots.multiplier')}: {result.multiplier}x</p>}
+                <p className="text-zinc-300">{t('slots.newBalance')}: <span className="font-bold text-white">{result.newBalance}</span></p>
+              </>
+            ) : (
+              <>
+                <div className="mb-4 text-6xl">⚠️</div>
+                <h2 className="mb-2 text-2xl font-black uppercase text-red-300">{t('slots.error')}</h2>
+                <p className="text-zinc-300">{result.error}</p>
+              </>
+            )}
+
+            <button
+              onClick={() => setShowResult(false)}
+              className="mt-8 w-full rounded-xl border border-amber-300/80 bg-amber-300/20 px-5 py-3 font-bold uppercase tracking-wide text-amber-100 hover:bg-amber-300/30"
+            >
+              {t('common.close')}
+            </button>
+          </div>
+        </div>
+      )}
+
+    </main>
   );
 }

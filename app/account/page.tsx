@@ -77,7 +77,7 @@ export default function AccountPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <main className="app-shell min-h-screen px-6 py-10 md:px-10">
+      <main className="app-shell profile-velvet-bg min-h-screen px-6 py-10 md:px-10">
         <div className="mx-auto w-full max-w-4xl rounded-3xl border border-border-default bg-surface p-10 text-center text-text-secondary">
           Loading account data...
         </div>
@@ -87,7 +87,7 @@ export default function AccountPage() {
 
   if (!accountData) {
     return (
-      <main className="app-shell min-h-screen px-6 py-10 md:px-10">
+      <main className="app-shell profile-velvet-bg min-h-screen px-6 py-10 md:px-10">
         <div className="mx-auto w-full max-w-4xl rounded-3xl border border-danger/60 bg-danger/10 p-10 text-center text-danger">
           Failed to load account.
         </div>
@@ -97,7 +97,7 @@ export default function AccountPage() {
 
   if (!isNewUi) {
     return (
-      <main className="app-shell min-h-screen px-6 py-10 md:px-10">
+      <main className="app-shell profile-velvet-bg min-h-screen px-6 py-10 md:px-10">
         <div className="mx-auto w-full max-w-5xl space-y-4">
           <div className="rounded-3xl border border-border-default bg-surface p-6">
             <h1 className="font-display text-4xl font-black">Account</h1>

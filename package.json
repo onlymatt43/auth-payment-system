@@ -11,7 +11,9 @@
     "start": "next start",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "db:migrate": "node scripts/db-migrate.js",
+    "db:init": "bash scripts/init-db.sh"
   },
   "dependencies": {
     "@libsql/client": "^0.17.0",

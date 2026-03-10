@@ -3,6 +3,49 @@ import { auth } from '@/lib/auth';
 import { createPayPalOrder } from '@/lib/paypal';
 import client from '@/lib/turso';
 
+function isPayPalConfigured() {
+  return !!process.env.PAYPAL_CLIENT_ID && !!process.env.PAYPAL_CLIENT_SECRET;
+}
+
+function mapPayPalError(error: unknown): { message: string; status: number } {
+  const maybeError = error as {
+    message?: string;
+    response?: { status?: number; data?: { error_description?: string } };
+  };
+
+  const status = maybeError?.response?.status;
+
+  if (status === 401 || status === 403) {
+    return {
+      message:
+        'PayPal non configuré ou credentials invalides (utilisez des clés sandbox valides en local).',
+      status: 503,
+    };
+  }
+
+  if (status && status >= 400 && status < 500) {
+    return {
+      message: 'Requête PayPal invalide. Vérifiez la configuration PayPal.',
+      status: 502,
+    };
+  }
+
+  if (status && status >= 500) {
+    return {
+      message: 'PayPal est temporairement indisponible. Réessayez plus tard.',
+      status: 502,
+    };
+  }
+
+  const providerMessage = maybeError?.response?.data?.error_description;
+  const fallback = maybeError?.message || providerMessage || 'Failed to create PayPal order';
+
+  return {
+    message: fallback,
+    status: 500,
+  };
+}
+
 /**
  * POST /api/paypal/create-order
  * Crée une commande PayPal pour acheter un package de points
@@ -15,6 +58,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
+      );
+    }
+
+    if (!isPayPalConfigured()) {
+      return NextResponse.json(
+        {
+          error:
+            'PayPal non configuré en local. Ajoutez PAYPAL_CLIENT_ID et PAYPAL_CLIENT_SECRET (sandbox) dans .env.local.',
+        },
+        { status: 503 }
       );
     }
 
@@ -74,12 +127,9 @@ export async function POST(req: NextRequest) {
         price: price_usd,
       },
     });
-
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const mapped = mapPayPalError(error);
     console.error('PayPal create order error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to create PayPal order' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: mapped.message }, { status: mapped.status });
   }
 }

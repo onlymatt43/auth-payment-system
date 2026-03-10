@@ -2,6 +2,14 @@ import { auth } from '@/lib/auth';
 import client from '@/lib/turso';
 import { NextRequest, NextResponse } from 'next/server';
 
+function parseSqliteUtcDate(value: string): Date {
+  // SQLite CURRENT_TIMESTAMP is UTC without timezone (YYYY-MM-DD HH:MM:SS).
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(value)) {
+    return new Date(value.replace(' ', 'T') + 'Z');
+  }
+  return new Date(value);
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Get session
@@ -41,7 +49,7 @@ export async function GET(request: NextRequest) {
     let nextSpinTime = new Date().toISOString();
 
     if (spinResult.rows.length > 0) {
-      const lastSpin = new Date(spinResult.rows[0].last_free_spin as string);
+      const lastSpin = parseSqliteUtcDate(spinResult.rows[0].last_free_spin as string);
       const now = new Date();
       const hoursSinceLastSpin = (now.getTime() - lastSpin.getTime()) / (1000 * 60 * 60);
 

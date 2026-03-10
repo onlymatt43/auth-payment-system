@@ -13,6 +13,7 @@ declare module "next-auth" {
     user: {
       email?: string | null;
       role?: string;
+      authProvider?: string;
     };
   }
 }
@@ -84,10 +85,15 @@ export const authConfig = {
       if (session?.user && token?.email) {
         session.user.email = token.email;
         session.user.role = token.role as string | undefined;
+        session.user.authProvider = token.authProvider as string | undefined;
       }
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
+      if (account?.provider) {
+        token.authProvider = account.provider;
+      }
+
       if (user?.email) {
         try {
           const dbUser = await findOrCreateUser(user.email, {
