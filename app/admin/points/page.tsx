@@ -224,7 +224,12 @@ export default function AdminPage() {
         <div className="w-full max-w-md">
           <div className="neon-border-yellow glass-dark rounded-3xl p-12 text-center">
             <h1 className="text-4xl font-black gradient-text mb-2">ACCÈS REFUSÉ</h1>
-            <p className="text-gray-400 text-sm tracking-widest mb-6">Cette page est réservée aux administrateurs.</p>
+            <p className="text-gray-400 text-sm tracking-widest mb-3">Cette page est réservée aux administrateurs.</p>
+            <p className="text-gray-500 text-xs mb-6 break-all">Compte actuel: {session?.user?.email || "non connecté"}</p>
+            <div className="flex flex-col gap-3">
+              <button onClick={() => window.location.href = "/login"} className="btn-neon">SE CONNECTER</button>
+              <button onClick={() => window.location.href = "/shop"} className="btn-yellow">RETOUR SHOP</button>
+            </div>
           </div>
         </div>
       </main>
