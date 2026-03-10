@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { createPayPalOrder } from '@/lib/paypal';
 import client from '@/lib/turso';
-import { findEffectivePackage, toNumber } from '@/lib/package-pricing';
+import { toNumber } from '@/lib/package-pricing';
 
 function isPayPalConfigured() {
   return !!process.env.PAYPAL_CLIENT_ID && !!process.env.PAYPAL_CLIENT_SECRET;
@@ -53,7 +53,6 @@ function mapPayPalError(error: unknown): { message: string; status: number } {
  */
 export async function POST(req: NextRequest) {
   try {
-    // Vérifier authentification Google
     const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json(
@@ -73,19 +72,18 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { package_id } = body;
+    const packageId = toNumber(body?.package_id);
 
-    if (!package_id) {
+    if (!packageId) {
       return NextResponse.json(
         { error: 'package_id required' },
         { status: 400 }
       );
     }
 
-    // Récupérer le package depuis la DB
     const packageResult = await client.execute({
-      sql: 'SELECT * FROM point_packages WHERE id = ? AND active = true',
-      args: [package_id],
+      sql: 'SELECT id, name, points, price_usd, active FROM point_packages WHERE id = ? AND active = true AND price_usd > 0 LIMIT 1',
+      args: [packageId],
     });
 
     if (packageResult.rows.length === 0) {
@@ -95,41 +93,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const pricingResult = await client.execute({
-      sql: 'SELECT id, name, points, price_usd, active FROM point_packages WHERE active = true AND price_usd > 0 ORDER BY points ASC, id ASC',
-      args: [],
-    });
+    const pkg = packageResult.rows[0] as Record<string, unknown>;
+    const name = String(pkg.name || 'Package');
+    const points = toNumber(pkg.points);
+    const priceUsd = toNumber(pkg.price_usd);
 
-    const effectivePackage = findEffectivePackage(
-      pricingResult.rows as Array<Record<string, unknown>>,
-      toNumber(package_id),
-    );
-
-    if (!effectivePackage) {
-      return NextResponse.json(
-        { error: 'Package not found or inactive' },
-        { status: 404 }
-      );
-    }
-
-    const name = String(effectivePackage.name || packageResult.rows[0]?.name || 'Package');
-    const points = toNumber(effectivePackage.points);
-    const effectivePriceUsd = toNumber(effectivePackage.price_usd);
-
-    // Créer la commande PayPal
     const customData = JSON.stringify({
-      package_id,
+      package_id: packageId,
       email: session.user.email,
       points,
     });
 
     const order = await createPayPalOrder(
-      effectivePriceUsd.toFixed(2),
+      priceUsd.toFixed(2),
       `${name} (${points} points)`,
       customData
     );
 
-    // Extraire l'URL d'approbation
     const approvalUrl = order.links?.find((link: any) => link.rel === 'approve')?.href;
 
     if (!approvalUrl) {
@@ -143,7 +123,7 @@ export async function POST(req: NextRequest) {
       package: {
         name,
         points,
-        price: effectivePriceUsd,
+        price: priceUsd,
       },
     });
   } catch (error: unknown) {

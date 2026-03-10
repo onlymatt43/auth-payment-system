@@ -4,7 +4,7 @@ import { capturePayPalOrder } from '@/lib/paypal';
 import { creditPoints } from '@/lib/points';
 import client from '@/lib/turso';
 import { createSafeLog } from '@/lib/log-sanitizer';
-import { findEffectivePackage, toNumber } from '@/lib/package-pricing';
+import { toNumber } from '@/lib/package-pricing';
 
 /**
  * GET /api/paypal/capture?token=xxx
@@ -15,16 +15,15 @@ export async function GET(req: NextRequest) {
   const baseUrl = process.env.NEXTAUTH_URL || new URL(req.url).origin;
 
   try {
-    const session = await auth(); // Optional: may be null after PayPal return
+    const session = await auth();
 
     const { searchParams } = new URL(req.url);
-    const token = searchParams.get('token'); // PayPal Order ID
+    const token = searchParams.get('token');
 
     if (!token) {
       return NextResponse.redirect(new URL('/shop?error=no_token', baseUrl));
     }
 
-    // Capture PayPal order
     const capture = await capturePayPalOrder(token);
 
     if (capture.status !== 'COMPLETED') {
@@ -56,7 +55,6 @@ export async function GET(req: NextRequest) {
       throw new Error('Missing recipient email in PayPal custom data');
     }
 
-    // Optional session consistency check (log only, do not block credit)
     if (session?.user?.email && session.user.email !== expectedRecipientEmail) {
       console.warn(
         `PayPal capture warning: Session email mismatch - session=${session.user.email}, order=${expectedRecipientEmail}`
@@ -64,7 +62,7 @@ export async function GET(req: NextRequest) {
     }
 
     const packageResult = await client.execute({
-      sql: 'SELECT * FROM point_packages WHERE id = ? AND active = true',
+      sql: 'SELECT id, name, points, price_usd, active FROM point_packages WHERE id = ? AND active = true AND price_usd > 0 LIMIT 1',
       args: [packageId],
     });
 
@@ -73,22 +71,9 @@ export async function GET(req: NextRequest) {
       throw new Error('Package not found or inactive');
     }
 
-    const pricingResult = await client.execute({
-      sql: 'SELECT id, name, points, price_usd, active FROM point_packages WHERE active = true AND price_usd > 0 ORDER BY points ASC, id ASC',
-      args: [],
-    });
-
-    const effectivePackage = findEffectivePackage(
-      pricingResult.rows as Array<Record<string, unknown>>,
-      packageId,
-    );
-
-    if (!effectivePackage) {
-      throw new Error('Package not found or inactive');
-    }
-
-    const expectedPoints = toNumber(effectivePackage.points);
-    const expectedPrice = toNumber(effectivePackage.price_usd);
+    const pkg = packageResult.rows[0] as Record<string, unknown>;
+    const expectedPoints = toNumber(pkg.points);
+    const expectedPrice = toNumber(pkg.price_usd);
     const actualPrice = parseFloat(purchaseUnit?.amount?.value || '0');
 
     if (requestedPoints !== expectedPoints) {
@@ -117,7 +102,6 @@ export async function GET(req: NextRequest) {
       throw new Error('Payment amount mismatch detected');
     }
 
-    // Idempotency: skip duplicate credit if this PayPal order/capture already credited
     const duplicateTx = await client.execute({
       sql: `
         SELECT up.balance
