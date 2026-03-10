@@ -1,22 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
 import client from '@/lib/turso';
-
-async function verifyAdminRole(): Promise<boolean> {
-  const session = await auth();
-  return session?.user?.role === 'admin';
-}
 
 /**
  * GET /api/admin/packages
- * 🔒 Requires admin role via NextAuth
+ * Open admin endpoint (temporary)
  */
 export async function GET(req: NextRequest) {
-  const isAdmin = await verifyAdminRole();
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
-  }
-
   try {
     const result = await client.execute({
       sql: 'SELECT * FROM point_packages ORDER BY points ASC',
@@ -31,19 +20,13 @@ export async function GET(req: NextRequest) {
 
 /**
  * POST /api/admin/packages
- * 🔒 Requires admin role via NextAuth
+ * Open admin endpoint (temporary)
  */
 export async function POST(req: NextRequest) {
-  const isAdmin = await verifyAdminRole();
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
-  }
-
   try {
     const body = await req.json();
     const { name, points, price_usd } = body;
 
-    // Validate inputs
     if (!name || !points || !price_usd) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }

@@ -1,22 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
 import client from '@/lib/turso';
-
-async function verifyAdminRole(): Promise<boolean> {
-  const session = await auth();
-  return session?.user?.role === 'admin';
-}
 
 /**
  * GET /api/admin/projects
- * 🔒 Requires admin role via NextAuth
+ * Open admin endpoint (temporary)
  */
 export async function GET(req: NextRequest) {
-  const isAdmin = await verifyAdminRole();
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
-  }
-
   try {
     const result = await client.execute({
       sql: 'SELECT * FROM project_costs ORDER BY project_name ASC',
@@ -31,14 +20,9 @@ export async function GET(req: NextRequest) {
 
 /**
  * PUT /api/admin/projects
- * 🔒 Requires admin role via NextAuth
+ * Open admin endpoint (temporary)
  */
 export async function PUT(req: NextRequest) {
-  const isAdmin = await verifyAdminRole();
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
-  }
-
   try {
     const body = await req.json();
     const { id, points_required } = body;

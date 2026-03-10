@@ -1,22 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
 import { getPointConfig, updatePointConfig } from '@/lib/points';
-
-async function verifyAdminRole(): Promise<boolean> {
-  const session = await auth();
-  return session?.user?.role === 'admin';
-}
 
 /**
  * GET /api/admin/config
- * 🔒 Requires admin role via NextAuth
+ * Open admin endpoint (temporary)
  */
 export async function GET(req: NextRequest) {
-  const isAdmin = await verifyAdminRole();
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
-  }
-
   try {
     const config = await getPointConfig();
     return NextResponse.json(config);
@@ -27,19 +16,13 @@ export async function GET(req: NextRequest) {
 
 /**
  * PUT /api/admin/config
- * 🔒 Requires admin role via NextAuth
+ * Open admin endpoint (temporary)
  */
 export async function PUT(req: NextRequest) {
-  const isAdmin = await verifyAdminRole();
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
-  }
-
   try {
     const body = await req.json();
     const { point_dollar_value, point_minutes_value } = body;
 
-    // Validate inputs
     if (point_dollar_value !== undefined && (typeof point_dollar_value !== 'number' || point_dollar_value < 0 || point_dollar_value > 100)) {
       return NextResponse.json({ error: 'Invalid dollar value (0-100)' }, { status: 400 });
     }

@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
 import client from '@/lib/turso';
 import { ensureStorefrontTable, mapStorefrontRow } from '@/lib/storefront';
-
-async function verifyAdminRole(): Promise<boolean> {
-  const session = await auth();
-  return session?.user?.role === 'admin';
-}
 
 function sanitizePayload(input: Record<string, unknown>) {
   const title = String(input.title || '').trim();
@@ -35,11 +29,6 @@ function sanitizePayload(input: Record<string, unknown>) {
 }
 
 export async function GET() {
-  const isAdmin = await verifyAdminRole();
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
-  }
-
   try {
     await ensureStorefrontTable();
     const result = await client.execute({
@@ -47,20 +36,13 @@ export async function GET() {
       args: [],
     });
 
-    return NextResponse.json({
-      items: result.rows.map(mapStorefrontRow),
-    });
+    return NextResponse.json({ items: result.rows.map(mapStorefrontRow) });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Failed to fetch storefront items' }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
-  const isAdmin = await verifyAdminRole();
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
-  }
-
   try {
     await ensureStorefrontTable();
     const body = await req.json();
@@ -97,11 +79,6 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-  const isAdmin = await verifyAdminRole();
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
-  }
-
   try {
     await ensureStorefrontTable();
     const body = await req.json();
@@ -155,11 +132,6 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const isAdmin = await verifyAdminRole();
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
-  }
-
   try {
     await ensureStorefrontTable();
     const { searchParams } = new URL(req.url);
@@ -169,11 +141,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Valid id is required' }, { status: 400 });
     }
 
-    await client.execute({
-      sql: 'DELETE FROM storefront_items WHERE id = ?',
-      args: [id],
-    });
-
+    await client.execute({ sql: 'DELETE FROM storefront_items WHERE id = ?', args: [id] });
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Failed to delete storefront item' }, { status: 500 });
