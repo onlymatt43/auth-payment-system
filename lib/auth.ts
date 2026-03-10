@@ -72,8 +72,12 @@ export const authConfig = {
       const isAdminRoute = nextUrl.pathname.startsWith("/admin");
       const isProtected = isAdminRoute || nextUrl.pathname.startsWith("/account");
 
-      if (isAdminRoute && auth?.user?.role !== "admin") {
-        return false;
+      if (isAdminRoute) {
+        const isAdmin = auth?.user?.role === "admin";
+        const isGoogleAdmin = (auth?.user as any)?.authProvider === "google";
+        if (!isAdmin || !isGoogleAdmin) {
+          return false;
+        }
       }
 
       if (isProtected && !isLoggedIn) {

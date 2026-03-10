@@ -218,13 +218,13 @@ export default function AdminPage() {
     );
   }
 
-  if (status === 'authenticated' && session?.user?.role !== 'admin') {
+  if (status === 'authenticated' && (session?.user?.role !== 'admin' || session?.user?.authProvider !== 'google')) {
     return (
       <main className="min-h-screen bg-gradient-to-br from-dark-darker via-dark-navy to-dark-blue flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           <div className="neon-border-yellow glass-dark rounded-3xl p-12 text-center">
             <h1 className="text-4xl font-black gradient-text mb-2">ACCÈS REFUSÉ</h1>
-            <p className="text-gray-400 text-sm tracking-widest mb-3">Cette page est réservée aux administrateurs.</p>
+            <p className="text-gray-400 text-sm tracking-widest mb-3">Cette page est réservée aux administrateurs connectés avec Google.</p>
             <p className="text-gray-500 text-xs mb-6 break-all">Compte actuel: {session?.user?.email || "non connecté"}</p>
             <div className="flex flex-col gap-3">
               <button onClick={() => window.location.href = "/login"} className="btn-neon">SE CONNECTER</button>

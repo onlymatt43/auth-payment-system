@@ -4,7 +4,7 @@ import client from '@/lib/turso';
 
 async function verifyAdminRole(): Promise<boolean> {
   const session = await auth();
-  return session?.user?.role === 'admin';
+  return session?.user?.role === 'admin' && session?.user?.authProvider === 'google';
 }
 
 /**
@@ -14,7 +14,7 @@ async function verifyAdminRole(): Promise<boolean> {
 export async function GET(req: NextRequest) {
   const isAdmin = await verifyAdminRole();
   if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized - Google admin required' }, { status: 401 });
   }
 
   try {
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   const isAdmin = await verifyAdminRole();
   if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized - Google admin required' }, { status: 401 });
   }
 
   try {
