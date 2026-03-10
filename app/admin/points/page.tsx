@@ -136,13 +136,18 @@ export default function AdminPage() {
 
   async function createStorefrontItem() {
     try {
-      await fetch('/api/admin/storefront', {
+      const res = await fetch('/api/admin/storefront', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(newStorefrontItem),
       });
+
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(payload?.error || 'Erreur lors de la création de la carte vitrine');
+      }
 
       setNewStorefrontItem({
         title: '',
@@ -158,8 +163,8 @@ export default function AdminPage() {
       });
 
       await loadData();
-    } catch {
-      alert('Erreur lors de la création de la carte vitrine');
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Erreur lors de la création de la carte vitrine');
     }
   }
 
@@ -169,16 +174,22 @@ export default function AdminPage() {
 
   async function saveStorefrontItem(item: StorefrontItem) {
     try {
-      await fetch('/api/admin/storefront', {
+      const res = await fetch('/api/admin/storefront', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(item),
       });
+
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(payload?.error || 'Erreur lors de la sauvegarde de la carte vitrine');
+      }
+
       await loadData();
-    } catch {
-      alert('Erreur lors de la sauvegarde de la carte vitrine');
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Erreur lors de la sauvegarde de la carte vitrine');
     }
   }
 
