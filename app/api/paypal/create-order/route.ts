@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { createPayPalOrder } from '@/lib/paypal';
 import client from '@/lib/turso';
-import { applyPackagePricePolicy, getSecondActivePackageId, toNumber } from '@/lib/package-pricing';
+import { findEffectivePackage, toNumber } from '@/lib/package-pricing';
 
 function isPayPalConfigured() {
   return !!process.env.PAYPAL_CLIENT_ID && !!process.env.PAYPAL_CLIENT_SECRET;
@@ -95,15 +95,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const pkg = packageResult.rows[0] as any;
-    const { name, points, price_usd } = pkg;
-
     const pricingResult = await client.execute({
-      sql: 'SELECT id, points, price_usd, active FROM point_packages WHERE active = true AND price_usd > 0 ORDER BY points ASC, id ASC',
+      sql: 'SELECT id, name, points, price_usd, active FROM point_packages WHERE active = true AND price_usd > 0 ORDER BY points ASC, id ASC',
       args: [],
     });
-    const secondActiveId = getSecondActivePackageId(pricingResult.rows as Array<Record<string, unknown>>);
-    const effectivePriceUsd = applyPackagePricePolicy(toNumber(package_id), toNumber(price_usd), secondActiveId);
+
+    const effectivePackage = findEffectivePackage(
+      pricingResult.rows as Array<Record<string, unknown>>,
+      toNumber(package_id),
+    );
+
+    if (!effectivePackage) {
+      return NextResponse.json(
+        { error: 'Package not found or inactive' },
+        { status: 404 }
+      );
+    }
+
+    const name = String(effectivePackage.name || packageResult.rows[0]?.name || 'Package');
+    const points = toNumber(effectivePackage.points);
+    const effectivePriceUsd = toNumber(effectivePackage.price_usd);
 
     // Créer la commande PayPal
     const customData = JSON.stringify({

@@ -61,7 +61,7 @@ export default function SlotsPage() {
     try {
       const res = await fetch('/api/balance');
       const data = await res.json();
-      setBalance(data.points || 0);
+      setBalance(data.balance || 0);
     } catch (error) {
       console.error('Failed to fetch balance:', error);
     }

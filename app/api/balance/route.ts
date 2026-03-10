@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { getUserBalance, getTransactionHistory } from '@/lib/points';
+import { createUserBalance, getUserBalance, getTransactionHistory } from '@/lib/points';
 
 /**
  * GET /api/balance
@@ -18,26 +18,17 @@ export async function GET(req: NextRequest) {
     }
 
     const email = session.user.email;
-    
+
     // Récupérer solde
     const balance = await getUserBalance(email);
-    
-    if (!balance) {
-      // Pas encore de solde = nouveau utilisateur
-      // Initialize user points
-      const initialized = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3001'}/api/init-user`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cookie': req.headers.get('cookie') || '',
-        },
-      });
 
+    if (!balance) {
+      const initialized = await createUserBalance(email);
       return NextResponse.json({
         email,
-        balance: 0,
-        total_earned: 0,
-        total_spent: 0,
+        balance: initialized?.balance || 0,
+        total_earned: initialized?.total_earned || 0,
+        total_spent: initialized?.total_spent || 0,
         recent_transactions: [],
       });
     }

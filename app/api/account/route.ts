@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { getUserBalance, getTransactionHistory } from '@/lib/points';
+import { createUserBalance, getUserBalance, getTransactionHistory } from '@/lib/points';
 
 /**
  * GET /api/account
@@ -18,19 +18,19 @@ export async function GET(req: NextRequest) {
     }
 
     const email = session.user.email;
-    
+
     // Récupérer solde
     const balance = await getUserBalance(email);
-    
+
     if (!balance) {
-      // Pas encore de solde = nouveau utilisateur
+      const initialized = await createUserBalance(email);
       return NextResponse.json({
         email,
-        balance: 0,
-        total_spent: 0,
-        total_earned: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        balance: initialized?.balance || 0,
+        total_spent: initialized?.total_spent || 0,
+        total_earned: initialized?.total_earned || 0,
+        created_at: initialized?.created_at || new Date().toISOString(),
+        updated_at: initialized?.updated_at || new Date().toISOString(),
         transactions: [],
       });
     }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { CTAButtons } from '@/components/CTAButtons';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -152,8 +152,21 @@ export default function ShopPage() {
             <p className="text-sm text-text-muted" data-testid="shop-login-reminder">{t('shop.loginReminder')}</p>
           )}
           <div className="flex items-center gap-2">
-            <Button type="button" variant="outline" tone="neutral" size="sm" onClick={() => router.push('/login')} data-testid="shop-login-button">
-              Log in
+            <Button
+              type="button"
+              variant="outline"
+              tone="neutral"
+              size="sm"
+              onClick={() => {
+                if (session?.user?.email) {
+                  void signOut({ callbackUrl: '/login' });
+                  return;
+                }
+                router.push('/login');
+              }}
+              data-testid="shop-login-button"
+            >
+              {session?.user?.email ? 'Log out' : 'Log in'}
             </Button>
             <LanguageSwitcher />
           </div>
