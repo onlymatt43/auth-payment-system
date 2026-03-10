@@ -45,7 +45,7 @@ export default function TermsOfService() {
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-neon-pink font-bold">•</span>
-                <span>Un compte valide avec Google OAuth est requis</span>
+                <span>Une première connexion par email + code est requise; la connexion Google peut ensuite être utilisée si disponible</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-neon-pink font-bold">•</span>
@@ -112,7 +112,7 @@ export default function TermsOfService() {
             <h2 className="text-2xl font-black text-neon-pink mb-4">5. Paiements et Remboursements</h2>
             <div className="space-y-4 text-gray-300">
               <p>
-                <strong>Méthode de Paiement:</strong> ONLYMATT accepte les paiements via PayPal en mode sandbox (test).
+                <strong>Méthode de Paiement:</strong> ONLYMATT accepte les paiements via PayPal (sandbox en environnement de test, live en production).
               </p>
               <p>
                 <strong>Frais:</strong> Aucun frais supplémentaire n'est facturé en plus des prix affichés. Les frais PayPal 

@@ -41,10 +41,10 @@ export default function PrivacyPolicy() {
               <div className="bg-dark-navy rounded-lg p-4 border border-neon-pink/30">
                 <h3 className="font-bold mb-2">Données de Compte</h3>
                 <ul className="space-y-1 text-sm">
-                  <li>• Nom (de Google)</li>
-                  <li>• Adresse email</li>
-                  <li>• Photo de profil (optionnel)</li>
-                  <li>• ID Google OAuth</li>
+                  <li>• Adresse email (requise pour la connexion email+code)</li>
+                  <li>• Nom (si fourni via Google)</li>
+                  <li>• Photo de profil (optionnel, via Google)</li>
+                  <li>• ID Google OAuth (si connexion Google utilisée)</li>
                 </ul>
               </div>
 
@@ -129,7 +129,7 @@ export default function PrivacyPolicy() {
                 </p>
                 <p className="flex items-start gap-2">
                   <span className="text-neon-yellow font-bold">🔒</span>
-                  <span><strong>Hashs Sécurisés:</strong> Les mots de passe (le cas échéant) sont hashés avec bcrypt</span>
+                  <span><strong>Hashs Sécurisés:</strong> Les codes de connexion email sont hachés et expirent rapidement</span>
                 </p>
                 <p className="flex items-start gap-2">
                   <span className="text-neon-yellow font-bold">🔒</span>
@@ -196,12 +196,11 @@ export default function PrivacyPolicy() {
               </p>
               <ul className="space-y-2 text-sm">
                 <li>• Stocker votre préférence de langue (EN/FR)</li>
-                <li>• Maintenir votre session utilisateur</li>
+                <li>• Stocker des préférences locales d'interface (ex: indicateurs de première connexion)</li>
                 <li>• Sauvegarder vos préférences de jeu</li>
               </ul>
               <p className="text-sm text-gray-400 mt-4">
-                Ces données sont stockées localement dans votre navigateur et ne sont pas envoyées à nos serveurs 
-                sans consentement explicite.
+                Les données localStorage restent dans votre navigateur. Les cookies de session nécessaires peuvent être transmis automatiquement pour maintenir l'authentification.
               </p>
             </div>
           </section>
@@ -237,7 +236,7 @@ export default function PrivacyPolicy() {
 
           {/* Section 8 */}
           <section className="neon-border-pink glass-dark rounded-3xl p-8">
-            <h2 className="text-2xl font-black text-neon-pink mb-4">8. Conservator des Données</h2>
+            <h2 className="text-2xl font-black text-neon-pink mb-4">8. Conservation des Données</h2>
             <div className="space-y-4 text-gray-300">
               <p>
                 Nous conservons vos données:
