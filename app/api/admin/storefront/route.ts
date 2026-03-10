@@ -5,7 +5,7 @@ import { ensureStorefrontTable, mapStorefrontRow } from '@/lib/storefront';
 
 async function verifyAdminRole(): Promise<boolean> {
   const session = await auth();
-  return session?.user?.role === 'admin' && session?.user?.authProvider === 'google';
+  return session?.user?.role === 'admin';
 }
 
 function sanitizePayload(input: Record<string, unknown>) {
@@ -37,7 +37,7 @@ function sanitizePayload(input: Record<string, unknown>) {
 export async function GET() {
   const isAdmin = await verifyAdminRole();
   if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized - Google admin required' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
   }
 
   try {
@@ -58,7 +58,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const isAdmin = await verifyAdminRole();
   if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized - Google admin required' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
   }
 
   try {
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   const isAdmin = await verifyAdminRole();
   if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized - Google admin required' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
   }
 
   try {
@@ -157,7 +157,7 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const isAdmin = await verifyAdminRole();
   if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized - Google admin required' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized - Admin role required' }, { status: 401 });
   }
 
   try {

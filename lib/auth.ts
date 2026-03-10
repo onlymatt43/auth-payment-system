@@ -74,8 +74,7 @@ export const authConfig = {
 
       if (isAdminRoute) {
         const isAdmin = auth?.user?.role === "admin";
-        const isGoogleAdmin = (auth?.user as any)?.authProvider === "google";
-        if (!isAdmin || !isGoogleAdmin) {
+        if (!isAdmin) {
           return false;
         }
       }
