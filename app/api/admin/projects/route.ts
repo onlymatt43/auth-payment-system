@@ -25,15 +25,34 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
-    const { id, points_required } = body;
+    const { id, points_required, active, project_name, project_slug } = body;
 
-    if (!id || typeof points_required !== 'number' || points_required < 0) {
-      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
+    if (!id || typeof id !== 'number') {
+      return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
+    }
+
+    if (typeof points_required !== 'number' || points_required < 0) {
+      return NextResponse.json({ error: 'Invalid points_required' }, { status: 400 });
     }
 
     await client.execute({
-      sql: 'UPDATE project_costs SET points_required = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      args: [points_required, id],
+      sql: `
+        UPDATE project_costs
+        SET
+          points_required = ?,
+          active = ?,
+          project_name = COALESCE(?, project_name),
+          project_slug = COALESCE(?, project_slug),
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `,
+      args: [
+        points_required,
+        active === undefined ? true : Boolean(active),
+        typeof project_name === 'string' ? project_name.trim() : null,
+        typeof project_slug === 'string' ? project_slug.trim() : null,
+        id,
+      ],
     });
 
     return NextResponse.json({ success: true });

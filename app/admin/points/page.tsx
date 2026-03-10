@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useEffect, useRef, useState } from 'react';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,8 +40,84 @@ interface StorefrontItem {
   sort_order: number;
 }
 
+function toNumber(value: unknown, fallback = 0): number {
+  const n = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function csvEscape(value: string | number | boolean | null | undefined): string {
+  const raw = String(value ?? '');
+  if (raw.includes(',') || raw.includes('"') || raw.includes('\n')) {
+    return `"${raw.replace(/"/g, '""')}"`;
+  }
+  return raw;
+}
+
+function parseCsvLine(line: string): string[] {
+  const out: string[] = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i += 1) {
+    const ch = line[i];
+
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (ch === ',' && !inQuotes) {
+      out.push(current.trim());
+      current = '';
+      continue;
+    }
+
+    current += ch;
+  }
+
+  out.push(current.trim());
+  return out;
+}
+
+function parseCsv(content: string): Array<Record<string, string>> {
+  const lines = content
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  if (lines.length < 2) return [];
+
+  const headers = parseCsvLine(lines[0]).map((h) => h.trim().toLowerCase());
+  const rows: Array<Record<string, string>> = [];
+
+  for (let i = 1; i < lines.length; i += 1) {
+    const cols = parseCsvLine(lines[i]);
+    const row: Record<string, string> = {};
+
+    for (let j = 0; j < headers.length; j += 1) {
+      row[headers[j]] = cols[j] ?? '';
+    }
+
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+function asBool(input: string | undefined, fallback = true): boolean {
+  if (input === undefined || input === '') return fallback;
+  const normalized = input.toLowerCase().trim();
+  return ['1', 'true', 'yes', 'oui', 'actif', 'active'].includes(normalized);
+}
+
 export default function AdminPage() {
-  const { data: session, status } = useSession();
+  const packageCsvInputRef = useRef<HTMLInputElement | null>(null);
+  const projectCsvInputRef = useRef<HTMLInputElement | null>(null);
 
   const [packages, setPackages] = useState<PointPackage[]>([]);
   const [projects, setProjects] = useState<ProjectCost[]>([]);
@@ -84,8 +159,27 @@ export default function AdminPage() {
         storefrontRes.json(),
       ]);
 
-      setPackages(pkgData.packages || []);
-      setProjects(projData.projects || []);
+      setPackages(
+        (pkgData.packages || []).map((pkg: Record<string, unknown>) => ({
+          id: toNumber(pkg.id),
+          name: String(pkg.name || ''),
+          points: toNumber(pkg.points),
+          price_usd: toNumber(pkg.price_usd),
+          paypal_plan_id: pkg.paypal_plan_id ? String(pkg.paypal_plan_id) : null,
+          active: Boolean(pkg.active),
+        }))
+      );
+
+      setProjects(
+        (projData.projects || []).map((proj: Record<string, unknown>) => ({
+          id: toNumber(proj.id),
+          project_slug: String(proj.project_slug || ''),
+          project_name: String(proj.project_name || ''),
+          points_required: toNumber(proj.points_required),
+          active: Boolean(proj.active),
+        }))
+      );
+
       setStorefront(storefrontData.items || []);
       setConfig(confData);
       setNewConfig({
@@ -113,6 +207,113 @@ export default function AdminPage() {
     }
   }
 
+  function updatePackageDraft(id: number, patch: Partial<PointPackage>) {
+    setPackages((prev) => prev.map((pkg) => (pkg.id === id ? { ...pkg, ...patch } : pkg)));
+  }
+
+  async function savePackage(pkg: PointPackage) {
+    try {
+      const res = await fetch('/api/admin/packages', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(pkg),
+      });
+
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}));
+        throw new Error(payload?.error || 'Erreur lors de la sauvegarde du package');
+      }
+
+      await loadData();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Erreur lors de la sauvegarde du package');
+    }
+  }
+
+  function exportPackagesCsv() {
+    const headers = ['id', 'name', 'points', 'price_usd', 'active'];
+    const lines = [headers.join(',')];
+
+    for (const pkg of packages) {
+      lines.push([
+        csvEscape(pkg.id),
+        csvEscape(pkg.name),
+        csvEscape(pkg.points),
+        csvEscape(pkg.price_usd),
+        csvEscape(pkg.active ? 1 : 0),
+      ].join(','));
+    }
+
+    const blob = new Blob([`${lines.join('\n')}\n`], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'admin-packages.csv';
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  async function importPackagesCsv(file: File) {
+    try {
+      const text = await file.text();
+      const rows = parseCsv(text);
+
+      if (!rows.length) {
+        alert('CSV vide ou invalide.');
+        return;
+      }
+
+      let created = 0;
+      let updated = 0;
+      let failed = 0;
+
+      for (const row of rows) {
+        const name = String(row.name || '').trim();
+        const points = Number(row.points);
+        const priceUsd = Number(row.price_usd);
+        const active = asBool(row.active, true);
+        const id = Number(row.id);
+
+        if (!name || !Number.isFinite(points) || !Number.isFinite(priceUsd) || points <= 0 || priceUsd <= 0) {
+          failed += 1;
+          continue;
+        }
+
+        const payload = {
+          name,
+          points,
+          price_usd: priceUsd,
+          active,
+        };
+
+        let res: Response;
+        if (Number.isFinite(id) && id > 0) {
+          res = await fetch('/api/admin/packages', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, ...payload }),
+          });
+          if (res.ok) updated += 1;
+        } else {
+          res = await fetch('/api/admin/packages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          if (res.ok) created += 1;
+        }
+
+        if (!res.ok) failed += 1;
+      }
+
+      await loadData();
+      alert(`Import packages terminé. Créés: ${created}, mis à jour: ${updated}, erreurs: ${failed}`);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Erreur import CSV packages');
+    }
+  }
+
   async function updateConfig() {
     try {
       await fetch('/api/admin/config', {
@@ -129,6 +330,112 @@ export default function AdminPage() {
       await loadData();
     } catch {
       alert('Erreur lors de la mise à jour');
+    }
+  }
+
+  function updateProjectDraft(id: number, patch: Partial<ProjectCost>) {
+    setProjects((prev) => prev.map((proj) => (proj.id === id ? { ...proj, ...patch } : proj)));
+  }
+
+  async function saveProject(project: ProjectCost) {
+    try {
+      const res = await fetch('/api/admin/projects', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(project),
+      });
+
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}));
+        throw new Error(payload?.error || 'Erreur lors de la sauvegarde du projet');
+      }
+
+      await loadData();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Erreur lors de la sauvegarde du projet');
+    }
+  }
+
+  function exportProjectsCsv() {
+    const headers = ['id', 'project_slug', 'project_name', 'points_required', 'active'];
+    const lines = [headers.join(',')];
+
+    for (const proj of projects) {
+      lines.push([
+        csvEscape(proj.id),
+        csvEscape(proj.project_slug),
+        csvEscape(proj.project_name),
+        csvEscape(proj.points_required),
+        csvEscape(proj.active ? 1 : 0),
+      ].join(','));
+    }
+
+    const blob = new Blob([`${lines.join('\n')}\n`], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'admin-projects.csv';
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  async function importProjectsCsv(file: File) {
+    try {
+      const text = await file.text();
+      const rows = parseCsv(text);
+
+      if (!rows.length) {
+        alert('CSV vide ou invalide.');
+        return;
+      }
+
+      const projectBySlug = new Map(projects.map((p) => [p.project_slug, p.id]));
+      let updated = 0;
+      let failed = 0;
+
+      for (const row of rows) {
+        let id = Number(row.id);
+        const slug = String(row.project_slug || '').trim();
+
+        if ((!Number.isFinite(id) || id <= 0) && slug) {
+          id = projectBySlug.get(slug) ?? 0;
+        }
+
+        const pointsRequired = Number(row.points_required);
+        const active = asBool(row.active, true);
+        const projectName = String(row.project_name || '').trim();
+
+        if (!id || !Number.isFinite(pointsRequired) || pointsRequired < 0) {
+          failed += 1;
+          continue;
+        }
+
+        const res = await fetch('/api/admin/projects', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id,
+            project_slug: slug || undefined,
+            project_name: projectName || undefined,
+            points_required: pointsRequired,
+            active,
+          }),
+        });
+
+        if (res.ok) {
+          updated += 1;
+        } else {
+          failed += 1;
+        }
+      }
+
+      await loadData();
+      alert(`Import projets terminé. Mis à jour: ${updated}, erreurs: ${failed}`);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Erreur import CSV projets');
     }
   }
 
@@ -441,7 +748,7 @@ export default function AdminPage() {
           </div>
 
           <div className="neon-border-yellow glass-dark rounded-3xl p-8">
-            <div className="mb-8 pb-8 border-b border-neon-yellow/30">
+            <div className="mb-8 pb-8 border-b border-neon-yellow/30 space-y-4">
               <p className="text-neon-yellow text-xs tracking-widest font-bold mb-4">➕ CRÉER UN NOUVEAU PACKAGE</p>
               <div className="grid md:grid-cols-4 gap-4">
                 <input
@@ -468,6 +775,22 @@ export default function AdminPage() {
                 />
                 <button onClick={createPackage} className="btn-neon">CRÉER</button>
               </div>
+
+              <div className="flex flex-wrap gap-3 pt-2">
+                <button type="button" onClick={exportPackagesCsv} className="btn-yellow">EXPORT CSV PACKAGES</button>
+                <button type="button" onClick={() => packageCsvInputRef.current?.click()} className="btn-neon">IMPORT CSV PACKAGES</button>
+                <input
+                  ref={packageCsvInputRef}
+                  type="file"
+                  accept=".csv,text/csv"
+                  className="hidden"
+                  onChange={async (event) => {
+                    const file = event.target.files?.[0];
+                    if (file) await importPackagesCsv(file);
+                    event.currentTarget.value = '';
+                  }}
+                />
+              </div>
             </div>
 
             <div className="overflow-x-auto">
@@ -479,19 +802,52 @@ export default function AdminPage() {
                     <th className="pb-4 text-center">PRIX (USD)</th>
                     <th className="pb-4 text-center">$/PT</th>
                     <th className="pb-4 text-center">STATUT</th>
+                    <th className="pb-4 text-right">ACTIONS</th>
                   </tr>
                 </thead>
                 <tbody>
                   {packages.map((pkg) => (
                     <tr key={pkg.id} className="border-b border-neon-yellow/10">
-                      <td className="py-4 font-bold">{pkg.name}</td>
-                      <td className="py-4 text-center text-neon-yellow">{pkg.points}</td>
-                      <td className="py-4 text-center">${pkg.price_usd.toFixed(2)}</td>
-                      <td className="py-4 text-center text-gray-400">${(pkg.price_usd / pkg.points).toFixed(3)}</td>
-                      <td className="py-4 text-center">
-                        <span className={pkg.active ? 'text-neon-yellow font-bold' : 'text-gray-500'}>
-                          {pkg.active ? '✓ ACTIF' : '✗ INACTIF'}
-                        </span>
+                      <td className="py-3 pr-2">
+                        <input
+                          type="text"
+                          value={pkg.name}
+                          onChange={(e) => updatePackageDraft(pkg.id, { name: e.target.value })}
+                          className="w-full bg-dark-navy border border-neon-yellow/40 rounded px-2 py-1 text-white"
+                        />
+                      </td>
+                      <td className="py-3 pr-2 text-center">
+                        <input
+                          type="number"
+                          value={pkg.points}
+                          onChange={(e) => updatePackageDraft(pkg.id, { points: parseInt(e.target.value, 10) || 0 })}
+                          className="w-24 bg-dark-navy border border-neon-yellow/40 rounded px-2 py-1 text-white text-center"
+                        />
+                      </td>
+                      <td className="py-3 pr-2 text-center">
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={pkg.price_usd}
+                          onChange={(e) => updatePackageDraft(pkg.id, { price_usd: parseFloat(e.target.value) || 0 })}
+                          className="w-28 bg-dark-navy border border-neon-yellow/40 rounded px-2 py-1 text-white text-center"
+                        />
+                      </td>
+                      <td className="py-3 text-center text-gray-400">${pkg.points > 0 ? (pkg.price_usd / pkg.points).toFixed(3) : '0.000'}</td>
+                      <td className="py-3 text-center">
+                        <label className="inline-flex items-center gap-2 text-xs">
+                          <input
+                            type="checkbox"
+                            checked={pkg.active}
+                            onChange={(e) => updatePackageDraft(pkg.id, { active: e.target.checked })}
+                          />
+                          <span className={pkg.active ? 'text-neon-yellow font-bold' : 'text-gray-500'}>
+                            {pkg.active ? 'ACTIF' : 'INACTIF'}
+                          </span>
+                        </label>
+                      </td>
+                      <td className="py-3 text-right">
+                        <button onClick={() => savePackage(pkg)} className="btn-neon">SAVE</button>
                       </td>
                     </tr>
                   ))}
@@ -507,7 +863,23 @@ export default function AdminPage() {
             <div className="flex-1 h-1 bg-gradient-to-r from-neon-blue to-transparent"></div>
           </div>
 
-          <div className="neon-border-blue glass-dark rounded-3xl p-8">
+          <div className="neon-border-blue glass-dark rounded-3xl p-8 space-y-6">
+            <div className="flex flex-wrap gap-3">
+              <button type="button" onClick={exportProjectsCsv} className="btn-yellow">EXPORT CSV PROJETS</button>
+              <button type="button" onClick={() => projectCsvInputRef.current?.click()} className="btn-neon">IMPORT CSV PROJETS</button>
+              <input
+                ref={projectCsvInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                className="hidden"
+                onChange={async (event) => {
+                  const file = event.target.files?.[0];
+                  if (file) await importProjectsCsv(file);
+                  event.currentTarget.value = '';
+                }}
+              />
+            </div>
+
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -517,6 +889,7 @@ export default function AdminPage() {
                     <th className="pb-4 text-center">POINTS REQUIS</th>
                     <th className="pb-4 text-center">DURÉE (CONFIG)</th>
                     <th className="pb-4 text-center">STATUT</th>
+                    <th className="pb-4 text-right">ACTIONS</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -525,14 +898,45 @@ export default function AdminPage() {
                     const hours = (minutes / 60).toFixed(1);
                     return (
                       <tr key={proj.id} className="border-b border-neon-blue/10">
-                        <td className="py-4"><code className="bg-dark-navy px-3 py-1 rounded text-neon-blue text-xs">{proj.project_slug}</code></td>
-                        <td className="py-4 font-bold">{proj.project_name}</td>
-                        <td className="py-4 text-center text-neon-blue">{proj.points_required} pts</td>
-                        <td className="py-4 text-center text-gray-400">{hours}h ({minutes}min)</td>
-                        <td className="py-4 text-center">
-                          <span className={proj.active ? 'text-neon-blue font-bold' : 'text-gray-500'}>
-                            {proj.active ? '✓ ACTIF' : '✗ INACTIF'}
-                          </span>
+                        <td className="py-3 pr-2">
+                          <input
+                            type="text"
+                            value={proj.project_slug}
+                            onChange={(e) => updateProjectDraft(proj.id, { project_slug: e.target.value })}
+                            className="w-full bg-dark-navy border border-neon-blue/40 rounded px-2 py-1 text-white"
+                          />
+                        </td>
+                        <td className="py-3 pr-2">
+                          <input
+                            type="text"
+                            value={proj.project_name}
+                            onChange={(e) => updateProjectDraft(proj.id, { project_name: e.target.value })}
+                            className="w-full bg-dark-navy border border-neon-blue/40 rounded px-2 py-1 text-white"
+                          />
+                        </td>
+                        <td className="py-3 text-center">
+                          <input
+                            type="number"
+                            value={proj.points_required}
+                            onChange={(e) => updateProjectDraft(proj.id, { points_required: parseInt(e.target.value, 10) || 0 })}
+                            className="w-28 bg-dark-navy border border-neon-blue/40 rounded px-2 py-1 text-white text-center"
+                          />
+                        </td>
+                        <td className="py-3 text-center text-gray-400">{hours}h ({minutes}min)</td>
+                        <td className="py-3 text-center">
+                          <label className="inline-flex items-center gap-2 text-xs">
+                            <input
+                              type="checkbox"
+                              checked={proj.active}
+                              onChange={(e) => updateProjectDraft(proj.id, { active: e.target.checked })}
+                            />
+                            <span className={proj.active ? 'text-neon-blue font-bold' : 'text-gray-500'}>
+                              {proj.active ? 'ACTIF' : 'INACTIF'}
+                            </span>
+                          </label>
+                        </td>
+                        <td className="py-3 text-right">
+                          <button onClick={() => saveProject(proj)} className="btn-neon">SAVE</button>
                         </td>
                       </tr>
                     );
