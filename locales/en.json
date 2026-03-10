@@ -158,6 +158,7 @@
     "cannotGenerate": "Unable to generate code",
     "firstTimeHint": "First login: enter your email to receive a security code.",
     "returningHint": "You can sign in by email or directly with Google.",
+    "emailCodeFirstRequired": "Start with email + code sign-in once to unlock Google login for your account.",
     "googleConnectedHint": "Signed in with Google: {email}",
     "emailConnectedHint": "Signed in with email: {email}",
     "googleAfterEmailHint": "You can now use Google for faster sign-ins on your next visits.",

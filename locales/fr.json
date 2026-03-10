@@ -158,6 +158,7 @@
     "cannotGenerate": "Impossible de générer le code",
     "firstTimeHint": "Première connexion: entre ton email pour recevoir un code de sécurité.",
     "returningHint": "Tu peux te connecter par email ou directement avec Google.",
+    "emailCodeFirstRequired": "Commence par une connexion email + code pour activer Google sur ton compte.",
     "googleConnectedHint": "Connecté avec Google: {email}",
     "emailConnectedHint": "Connecté avec email: {email}",
     "googleAfterEmailHint": "Tu peux maintenant utiliser Google pour te connecter plus vite lors des prochaines visites.",

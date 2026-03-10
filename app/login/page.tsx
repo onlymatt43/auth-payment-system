@@ -4,12 +4,12 @@ import { FormEvent, useEffect, useState } from 'react';
 import { getProviders, signIn, signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { isNewUiEnabled } from '@/lib/feature-flags';
-import { Alert, Button, Card, Input } from '@/components/ui';
+import { Button, Card, Input } from '@/components/ui';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useI18n } from '@/lib/use-i18n';
 import { BrandBanner } from '@/components/BrandBanner';
 
-type Step = 'request' | 'pending' | 'verify';
+type Step = 'request' | 'verify';
 
 const EMAIL_HISTORY_KEY = 'onlymatt_email_login_done';
 
@@ -68,6 +68,17 @@ export default function LoginPage() {
     }
   }, [session?.user?.authProvider]);
 
+  useEffect(() => {
+    if (session?.user || typeof window === 'undefined') return;
+
+    const nextAuthError = new URLSearchParams(window.location.search).get('error');
+    if (!nextAuthError) return;
+
+    if (nextAuthError === 'email_code_first' || nextAuthError === 'AccessDenied') {
+      setError(t('login.emailCodeFirstRequired'));
+    }
+  }, [session?.user, t]);
+
   const allowGoogleOption = googleAvailable && hasEmailHistory;
 
   const rememberEmailFlow = () => {
@@ -102,12 +113,12 @@ export default function LoginPage() {
         throw new Error(data.error || t('login.cannotGenerate'));
       }
 
-      setStep('pending');
       if (data?.mailFallback && data?.devCode) {
         setInfo(t('login.devCode', { code: data.devCode }));
       } else {
         setInfo(t('login.sent'));
       }
+      setStep('verify');
     } catch (err) {
       setError(err instanceof Error ? err.message : t('login.unexpected'));
     } finally {
@@ -175,7 +186,7 @@ export default function LoginPage() {
               {t('login.continue')}
             </Button>
           </form>
-          {(error || info) && <Alert tone={error ? 'danger' : 'accent'}>{error || info}</Alert>}
+          {(error || info) && <p className={error ? 'text-sm text-red-300' : 'text-sm text-amber-200'}>{error || info}</p>}
         </Card>
       </main>
     );
@@ -196,109 +207,86 @@ export default function LoginPage() {
 
         <Card className="space-y-4">
           {!session ? (
-            <>
-              <Alert tone={hasEmailHistory ? 'accent' : 'brand'}>
-                {hasEmailHistory ? t('login.returningHint') : t('login.firstTimeHint')}
-              </Alert>
-
-              {step === 'request' && (
-                <div className="space-y-4">
-                  <form onSubmit={handleRequestCode} className="space-y-4">
-                    <Input
-                      type="email"
-                      required
-                      label={t('login.step1')}
-                      placeholder={t('login.enterEmail')}
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      data-testid="login-email-input"
-                    />
-                    <Button type="submit" className="w-full" size="lg" state={loading ? 'loading' : 'idle'} data-testid="login-request-code">
-                      {t('login.continue')}
-                    </Button>
-                  </form>
-
-                  {allowGoogleOption && (
-                    <Button type="button" variant="outline" tone="neutral" className="w-full" onClick={handleGoogle} data-testid="login-google">
-                      {t('login.google')}
-                    </Button>
-                  )}
-                </div>
+            <div className="space-y-4">
+              {step === 'request' ? (
+                <form onSubmit={handleRequestCode} className="space-y-4">
+                  <Input
+                    type="email"
+                    required
+                    label={t('login.step1')}
+                    placeholder={t('login.enterEmail')}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    data-testid="login-email-input"
+                  />
+                  <Button type="submit" className="w-full" size="lg" state={loading ? 'loading' : 'idle'} data-testid="login-request-code">
+                    {t('login.continue')}
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={handleVerifyCode} className="space-y-4">
+                  <Input
+                    type="text"
+                    required
+                    label={t('login.step2')}
+                    placeholder={t('login.enterCode')}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    className="text-center text-2xl tracking-[0.25em]"
+                    data-testid="login-code-input"
+                  />
+                  <Button type="submit" tone="accent" className="w-full" size="lg" state={loading ? 'loading' : 'idle'} data-testid="login-verify-code">
+                    {t('login.signIn')}
+                  </Button>
+                </form>
               )}
 
-              {step === 'pending' && (
-                <div className="space-y-4">
-                  <button
-                    type="button"
-                    onClick={() => setStep('verify')}
-                    className="w-full rounded-2xl border border-accent/60 bg-accent/10 px-4 py-5 text-left transition hover:border-accent hover:bg-accent/15"
-                    data-testid="login-go-verify"
-                  >
-                    <p className="text-sm font-semibold uppercase tracking-[0.16em] text-accent">{t('login.messageLabel')}</p>
-                    <p className="mt-2 text-text-primary">{t('login.messageBody')}</p>
-                    <p className="mt-1 text-sm text-text-secondary">{t('login.messageAction')}</p>
-                  </button>
-
-                  {allowGoogleOption && (
-                    <Button type="button" variant="outline" tone="neutral" className="w-full" onClick={handleGoogle} data-testid="login-google">
-                      {t('login.google')}
-                    </Button>
-                  )}
-                </div>
-              )}
-
-              {step === 'verify' && (
-                <div className="space-y-4">
-                  <form onSubmit={handleVerifyCode} className="space-y-4">
-                    <Input
-                      type="text"
-                      required
-                      label={t('login.step2')}
-                      placeholder={t('login.enterCode')}
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
-                      className="text-center text-2xl tracking-[0.25em]"
-                      data-testid="login-code-input"
-                    />
-                    <Button type="submit" tone="accent" className="w-full" size="lg" state={loading ? 'loading' : 'idle'} data-testid="login-verify-code">
-                      {t('login.signIn')}
-                    </Button>
+              <div className="space-y-2 text-sm text-amber-100/90">
+                {step === 'request' && (
+                  <p>{hasEmailHistory ? t('login.returningHint') : t('login.firstTimeHint')}</p>
+                )}
+                {step === 'verify' && (
+                  <>
+                    <p>{info || t('login.messageBody')}</p>
                     <button
                       type="button"
-                      onClick={() => setStep('request')}
-                      className="w-full text-sm text-text-muted hover:text-text-primary"
+                      onClick={() => {
+                        setStep('request');
+                        setCode('');
+                        setInfo(null);
+                      }}
+                      className="text-xs uppercase tracking-[0.18em] text-amber-300 transition hover:text-amber-200"
                     >
                       {t('login.useOtherEmail')}
                     </button>
-                  </form>
+                  </>
+                )}
+                {error && <p className="text-red-300">{error}</p>}
+              </div>
 
-                  {allowGoogleOption && (
-                    <Button type="button" variant="outline" tone="neutral" className="w-full" onClick={handleGoogle} data-testid="login-google">
-                      {t('login.google')}
-                    </Button>
-                  )}
-                </div>
+              {allowGoogleOption && (
+                <Button type="button" variant="outline" tone="neutral" className="w-full" onClick={handleGoogle} data-testid="login-google">
+                  {t('login.google')}
+                </Button>
               )}
-
-              {(error || info) && <Alert tone={error ? 'danger' : 'accent'}>{error || info}</Alert>}
-            </>
+            </div>
           ) : session.user.authProvider === 'google' ? (
             <div className="space-y-4">
-              <Alert tone="accent">{t('login.googleConnectedHint', { email: session.user.email || '' })}</Alert>
+              <p className="text-sm text-amber-100/90">{t('login.googleConnectedHint', { email: session.user.email || '' })}</p>
               <Button type="button" tone="danger" className="w-full" onClick={() => signOut({ callbackUrl: '/login' })}>
                 {t('login.logout')}
               </Button>
             </div>
           ) : (
             <div className="space-y-4">
-              <Alert tone="brand">{t('login.emailConnectedHint', { email: session.user.email || '' })}</Alert>
-              <p className="text-sm text-text-secondary">{t('login.googleAfterEmailHint')}</p>
+              <p className="text-sm text-amber-100/90">{t('login.emailConnectedHint', { email: session.user.email || '' })}</p>
+              <p className="text-sm text-amber-100/80">{t('login.googleAfterEmailHint')}</p>
               {googleAvailable ? (
                 <Button type="button" tone="accent" className="w-full" onClick={handleGoogle} data-testid="login-google">
                   {t('login.google')}
                 </Button>
               ) : (
-                <Alert tone="danger">{t('login.googleUnavailable')}</Alert>
+                <p className="text-sm text-red-300">{t('login.googleUnavailable')}</p>
               )}
             </div>
           )}

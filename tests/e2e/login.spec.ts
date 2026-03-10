@@ -21,9 +21,6 @@ test.describe('Email-first login', () => {
     await emailInput.fill('test@example.com');
 
     await page.getByTestId('login-request-code').click();
-    await expect(page.getByTestId('login-go-verify')).toBeVisible();
-
-    await page.getByTestId('login-go-verify').click();
     await expect(page.getByTestId('login-code-input')).toBeVisible();
   });
 

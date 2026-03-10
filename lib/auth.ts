@@ -43,6 +43,7 @@ const providers: NextAuthConfig["providers"] = [
       }
 
       const user = await findOrCreateUser(email);
+      await markEmailVerified(email);
 
       return {
         id: user.id,
@@ -77,6 +78,23 @@ export const authConfig = {
 
       if (isProtected && !isLoggedIn) {
         return false;
+      }
+
+      return true;
+    },
+    async signIn({ user, account }) {
+      if (account?.provider !== "google") {
+        return true;
+      }
+
+      const email = user?.email?.toLowerCase().trim();
+      if (!email) {
+        return "/login?error=email_code_first";
+      }
+
+      const hasEmailCodeFlow = await hasVerifiedEmailLogin(email);
+      if (!hasEmailCodeFlow) {
+        return "/login?error=email_code_first";
       }
 
       return true;
@@ -116,6 +134,27 @@ export const authConfig = {
 } satisfies NextAuthConfig;
 
 export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
+
+async function hasVerifiedEmailLogin(email: string): Promise<boolean> {
+  const result = await client.execute({
+    sql: "SELECT id, email_verified FROM users WHERE email = ? LIMIT 1",
+    args: [email],
+  });
+
+  if (result.rows.length === 0) {
+    return false;
+  }
+
+  const row = result.rows[0] as unknown as { email_verified?: string | null };
+  return Boolean(row.email_verified);
+}
+
+async function markEmailVerified(email: string): Promise<void> {
+  await client.execute({
+    sql: "UPDATE users SET email_verified = COALESCE(email_verified, CURRENT_TIMESTAMP), updated_at = CURRENT_TIMESTAMP WHERE email = ?",
+    args: [email],
+  });
+}
 
 async function findOrCreateUser(email: string, profile?: { name?: string | null; image?: string | null }) {
   const existing = await client.execute({
