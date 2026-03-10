@@ -130,3 +130,18 @@ body {
   background-size: cover;
   background-attachment: fixed;
 }
+
+.admin-points-page input,
+.admin-points-page select,
+.admin-points-page textarea {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff;
+  caret-color: #f7c74d;
+  background-color: rgba(13, 19, 33, 0.92);
+}
+
+.admin-points-page input::placeholder,
+.admin-points-page textarea::placeholder {
+  color: #9ca3af;
+  -webkit-text-fill-color: #9ca3af;
+}

@@ -221,7 +221,7 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-dark-darker via-dark-navy to-dark-blue text-white p-6 md:p-12">
+    <main className="admin-points-page min-h-screen bg-gradient-to-br from-dark-darker via-dark-navy to-dark-blue text-white p-6 md:p-12">
       <div className="max-w-7xl mx-auto space-y-12">
         <div>
           <h1 className="text-5xl md:text-6xl font-black gradient-text mb-2">ADMINISTRATION</h1>
