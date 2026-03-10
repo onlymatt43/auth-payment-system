@@ -33,11 +33,26 @@ interface UserBalance {
   }>;
 }
 
+interface StorefrontItem {
+  id: number;
+  title: string;
+  subtitle: string | null;
+  price_label: string | null;
+  cta_label: string | null;
+  cta_url: string | null;
+  media_url: string | null;
+  media_type: 'none' | 'image' | 'video';
+  badge: string | null;
+  active: number;
+  sort_order: number;
+}
+
 export default function ShopPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const [packages, setPackages] = useState<PointPackage[]>([]);
   const [balance, setBalance] = useState<UserBalance | null>(null);
+  const [storefrontItems, setStorefrontItems] = useState<StorefrontItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -46,7 +61,7 @@ export default function ShopPage() {
   const isNewUi = isNewUiEnabled('payment');
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [session]);
 
   const activePackages = useMemo(() => packages.filter((pkg) => pkg.active), [packages]);
@@ -56,9 +71,19 @@ export default function ShopPage() {
   async function loadData() {
     try {
       setErrorMessage(null);
-      const pkgRes = await fetch('/api/packages');
-      const pkgData = await pkgRes.json();
+
+      const [pkgRes, storefrontRes] = await Promise.all([
+        fetch('/api/packages'),
+        fetch('/api/storefront'),
+      ]);
+
+      const [pkgData, storefrontData] = await Promise.all([
+        pkgRes.json(),
+        storefrontRes.json(),
+      ]);
+
       setPackages(pkgData.packages || []);
+      setStorefrontItems(storefrontData.items || []);
 
       if (session?.user?.email) {
         const balanceRes = await fetch('/api/balance');
@@ -173,6 +198,62 @@ export default function ShopPage() {
         </header>
 
         {errorMessage && <Alert tone="danger">{errorMessage}</Alert>}
+
+        {storefrontItems.length > 0 && (
+          <section className="space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <SectionHeader title="Vitrine" />
+            </div>
+            <div className="-mx-2 flex snap-x snap-mandatory gap-4 overflow-x-auto px-2 pb-2">
+              {storefrontItems.map((item) => {
+                const ctaLabel = item.cta_label?.trim() || 'Soon';
+                const hasLink = Boolean(item.cta_url);
+                return (
+                  <Card key={item.id} className="min-w-[320px] snap-start border-border-default md:min-w-[380px]">
+                    {item.media_url && item.media_type === 'video' && (
+                      <div className="mb-4 overflow-hidden rounded-xl border border-border-subtle">
+                        <video src={item.media_url} className="h-40 w-full object-cover" autoPlay muted loop playsInline />
+                      </div>
+                    )}
+                    {item.media_url && item.media_type !== 'video' && (
+                      <div className="mb-4 overflow-hidden rounded-xl border border-border-subtle">
+                        <img src={item.media_url} alt={item.title} className="h-40 w-full object-cover" />
+                      </div>
+                    )}
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-xl font-black text-text-primary">{item.title}</p>
+                        {item.subtitle && <p className="mt-1 text-sm text-text-secondary">{item.subtitle}</p>}
+                      </div>
+                      <div className="text-right">
+                        {item.badge && <p className="text-xs font-bold uppercase tracking-wide text-accent">{item.badge}</p>}
+                        {item.price_label && <p className="mt-2 font-display text-3xl font-black text-brand">{item.price_label}</p>}
+                      </div>
+                    </div>
+                    {hasLink ? (
+                      <a
+                        href={item.cta_url || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-6 inline-flex w-full items-center justify-center rounded-2xl bg-brand px-5 py-3 text-sm font-semibold text-ink transition hover:bg-brand-strong"
+                      >
+                        {ctaLabel}
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled
+                        className="mt-6 inline-flex w-full cursor-not-allowed items-center justify-center rounded-2xl border border-border-default bg-surface-elevated px-5 py-3 text-sm font-semibold text-text-muted"
+                      >
+                        {ctaLabel}
+                      </button>
+                    )}
+                  </Card>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         <section className="space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-3">

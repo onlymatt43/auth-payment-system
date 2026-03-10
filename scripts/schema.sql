@@ -103,6 +103,22 @@ CREATE TABLE IF NOT EXISTS project_costs (
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS storefront_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  subtitle TEXT,
+  price_label TEXT,
+  cta_label TEXT,
+  cta_url TEXT,
+  media_url TEXT,
+  media_type TEXT NOT NULL DEFAULT 'none',
+  badge TEXT,
+  active BOOLEAN DEFAULT 1,
+  sort_order INTEGER DEFAULT 100,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON accounts(user_id);
@@ -115,6 +131,7 @@ CREATE INDEX IF NOT EXISTS idx_user_spins_user_id ON user_spins(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_spins_created_at ON user_spins(created_at);
 CREATE INDEX IF NOT EXISTS idx_daily_free_spins_user_id ON daily_free_spins(user_id);
 CREATE INDEX IF NOT EXISTS idx_project_costs_slug ON project_costs(project_slug);
+CREATE INDEX IF NOT EXISTS idx_storefront_items_active_sort ON storefront_items(active, sort_order, id);
 
 INSERT OR IGNORE INTO point_packages (name, points, price_usd, description, active)
 VALUES ('Starter Pack', 50, 5.00, 'Perfect for trying out', 1);
