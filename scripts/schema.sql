@@ -120,7 +120,7 @@ INSERT OR IGNORE INTO point_packages (name, points, price_usd, description, acti
 VALUES ('Starter Pack', 50, 5.00, 'Perfect for trying out', 1);
 
 INSERT OR IGNORE INTO point_packages (name, points, price_usd, description, active)
-VALUES ('Standard Pack', 250, 15.00, 'Most popular choice', 1);
+VALUES ('Standard Pack', 250, 10.00, 'Most popular choice', 1);
 
 INSERT OR IGNORE INTO point_packages (name, points, price_usd, description, active)
 VALUES ('Premium Pack', 1000, 50.00, 'Best value', 1);

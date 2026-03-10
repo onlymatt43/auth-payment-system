@@ -82,7 +82,7 @@ ON CONFLICT(id) DO NOTHING;
 -- Data initial: Packages par défaut
 INSERT INTO point_packages (name, points, price_usd, active) VALUES
   ('Pack Starter', 50, 5.00, true),
-  ('Pack Standard', 200, 15.00, true),
+  ('Pack Standard', 200, 10.00, true),
   ('Pack Premium', 500, 30.00, true)
 ON CONFLICT DO NOTHING;
 

@@ -65,6 +65,24 @@ async function run() {
     'CREATE UNIQUE INDEX IF NOT EXISTS idx_point_packages_unique ON point_packages(name, points, price_usd, active)'
   );
 
+  // Business normalization:
+  // 1) hide invalid free-price packages
+  await client.execute(
+    `UPDATE point_packages SET active = 0 WHERE active = 1 AND price_usd <= 0`
+  );
+
+  // 2) enforce the second active package at $10 (ordered by points asc)
+  await client.execute(`
+    WITH ranked AS (
+      SELECT id, ROW_NUMBER() OVER (ORDER BY points ASC, id ASC) AS rn
+      FROM point_packages
+      WHERE active = 1 AND price_usd > 0
+    )
+    UPDATE point_packages
+    SET price_usd = 10.00
+    WHERE id IN (SELECT id FROM ranked WHERE rn = 2)
+  `);
+
   console.log(`db:migrate complete | executed=${executed} skipped=${skipped}`);
 }
 

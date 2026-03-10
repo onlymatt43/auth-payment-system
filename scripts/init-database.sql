@@ -21,7 +21,7 @@ CREATE INDEX idx_user_spins_user_id ON user_spins(user_id);
 CREATE INDEX idx_user_spins_created_at ON user_spins(created_at);
 CREATE INDEX idx_daily_free_spins_user_id ON daily_free_spins(user_id);
 INSERT INTO point_packages (name, points, price_usd, description, active) VALUES ('Starter Pack', 50, 5.00, 'Perfect for trying out', 1);
-INSERT INTO point_packages (name, points, price_usd, description, active) VALUES ('Standard Pack', 250, 15.00, 'Most popular choice', 1);
+INSERT INTO point_packages (name, points, price_usd, description, active) VALUES ('Standard Pack', 250, 10.00, 'Most popular choice', 1);
 INSERT INTO point_packages (name, points, price_usd, description, active) VALUES ('Premium Pack', 1000, 50.00, 'Best value', 1);
 INSERT INTO point_packages (name, points, price_usd, description, active) VALUES ('VIP Pack', 5000, 200.00, 'Maximum value', 1);
 INSERT INTO project_costs (project_slug, project_name, points_required, active) VALUES ('only-surrr', 'ONLY SURRR', 10, 1);

@@ -8,7 +8,7 @@ import client from '@/lib/turso';
 export async function GET() {
   try {
     const result = await client.execute({
-      sql: 'SELECT * FROM point_packages WHERE active = true ORDER BY points ASC',
+      sql: 'SELECT * FROM point_packages WHERE active = true AND price_usd > 0 ORDER BY points ASC',
       args: [],
     });
 
